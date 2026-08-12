@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClientDrill — white-label crisis drills as a BD channel</title>
+<meta name="description" content="Demo: white-label crisis drills a law firm sends to its clients, and the business-development signals the results generate.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="app-header">
+  <div class="header-inner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">CD</span>
+      <span class="brand-text">
+        <span class="brand-name">ClientDrill</span>
+        <span class="brand-tag">Your clients drill. You get the call.</span>
+      </span>
+    </div>
+
+    <nav class="tabs" aria-label="Screens">
+      <div class="tablist" role="tablist">
+        <button class="tab" role="tab" id="tab-campaigns" aria-controls="panel-campaigns" aria-selected="true" data-tab="campaigns">Campaigns</button>
+        <button class="tab" role="tab" id="tab-builder"   aria-controls="panel-builder"   aria-selected="false" data-tab="builder" tabindex="-1">Drill Builder</button>
+        <button class="tab" role="tab" id="tab-signals"   aria-controls="panel-signals"   aria-selected="false" data-tab="signals" tabindex="-1">Signals</button>
+        <button class="tab" role="tab" id="tab-about"     aria-controls="panel-about"     aria-selected="false" data-tab="about" tabindex="-1">About this play</button>
+      </div>
+    </nav>
+
+    <div class="header-right">
+      <span class="whoami" title="Signed in as">Jasmine Ordway · Harwood Kelly</span>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-live="polite">
+        <span class="theme-icon" aria-hidden="true"></span>
+        <span id="theme-label">Dark</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="container">
+
+  <!-- =============================================== CAMPAIGNS ========= -->
+  <section class="panel" id="panel-campaigns" role="tabpanel" aria-labelledby="tab-campaigns" tabindex="-1">
+    <div class="panel-head">
+      <h1>Campaigns</h1>
+      <p class="lede">Branded drills Harwood Kelly has sent to client teams. Select a row to see who completed it, where the cohort broke down, and the call it justifies.</p>
+    </div>
+
+    <div class="filter-row" role="group" aria-label="Campaign filters">
+      <div class="field">
+        <label for="f-scenario">Scenario type</label>
+        <select id="f-scenario"><option value="">All scenarios</option></select>
+      </div>
+      <div class="field">
+        <label for="f-status">Status</label>
+        <select id="f-status">
+          <option value="">All statuses</option>
+          <option value="Draft">Draft</option>
+          <option value="Live">Live</option>
+          <option value="Closed">Closed</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="f-client">Client</label>
+        <select id="f-client"><option value="">All clients</option></select>
+      </div>
+      <div class="field grow">
+        <label for="f-search">Search</label>
+        <input type="search" id="f-search" placeholder="Campaign or client name…" autocomplete="off">
+      </div>
+      <button type="button" class="link-btn reset-btn" id="camp-reset" hidden>Reset filters</button>
+    </div>
+
+    <div class="stat-row" id="camp-stats"></div>
+
+    <div class="table-wrap">
+      <table class="data-table" id="camp-table">
+        <caption class="sr-only">Drill campaigns. Select a row to open its detail panel.</caption>
+        <thead>
+          <tr>
+            <th scope="col" data-key="name"><button type="button">Campaign</button></th>
+            <th scope="col" data-key="scenario"><button type="button">Scenario</button></th>
+            <th scope="col" data-key="client"><button type="button">Client</button></th>
+            <th scope="col" class="num" data-key="invitees"><button type="button">Invitees</button></th>
+            <th scope="col" class="num" data-key="completion"><button type="button">Completion</button></th>
+            <th scope="col" class="num" data-key="score"><button type="button">Avg score</button></th>
+            <th scope="col" data-key="weakest"><button type="button">Weakest step</button></th>
+            <th scope="col" data-key="status"><button type="button">Status</button></th>
+          </tr>
+        </thead>
+        <tbody id="camp-body"></tbody>
+      </table>
+      <p class="empty-state" id="camp-empty" hidden>No campaigns match those filters. <button type="button" class="link-btn" data-reset="camp">Reset filters</button></p>
+    </div>
+  </section>
+
+  <!-- =============================================== DRILL BUILDER ===== -->
+  <section class="panel" id="panel-builder" role="tabpanel" aria-labelledby="tab-builder" tabindex="-1" hidden>
+    <div class="panel-head">
+      <h1>Drill Builder</h1>
+      <p class="lede">Assemble a branded drill from the scenario library, preview exactly what the client sees, then send it from the firm — not from us.</p>
+    </div>
+
+    <div class="builder-grid">
+      <form class="builder-form card" id="builder-form" novalidate>
+        <h2 class="card-title">1 · Scenario</h2>
+        <div class="field">
+          <label for="b-scenario">Scenario</label>
+          <select id="b-scenario"></select>
+        </div>
+        <div class="field">
+          <label for="b-industry">Industry framing</label>
+          <select id="b-industry"></select>
+        </div>
+        <div class="field">
+          <label for="b-difficulty">Difficulty</label>
+          <select id="b-difficulty"></select>
+          <p class="field-note" id="b-difficulty-note"></p>
+        </div>
+
+        <h2 class="card-title">2 · Branding</h2>
+        <div class="field">
+          <label for="b-firm">Firm name on the drill</label>
+          <input type="text" id="b-firm" value="Harwood Kelly" maxlength="40" autocomplete="off">
+        </div>
+        <fieldset class="field swatch-field">
+          <legend>Brand colour</legend>
+          <div class="swatches" id="b-swatches" role="radiogroup" aria-label="Brand colour"></div>
+        </fieldset>
+
+        <h2 class="card-title">3 · Audience</h2>
+        <div class="field">
+          <label for="b-client">Client</label>
+          <select id="b-client"></select>
+        </div>
+        <div class="field">
+          <label for="b-cohort">Invite cohort</label>
+          <select id="b-cohort">
+            <option value="Executive team">Executive team</option>
+            <option value="Board and executive">Board and executive</option>
+            <option value="Site leadership">Site leadership</option>
+            <option value="Legal, risk and compliance">Legal, risk and compliance</option>
+            <option value="Whole management group">Whole management group</option>
+          </select>
+        </div>
+
+        <h2 class="card-title">4 · Options</h2>
+        <div class="toggles">
+          <label class="toggle"><input type="checkbox" id="b-leaderboard" checked><span class="toggle-ui" aria-hidden="true"></span><span class="toggle-text">Cohort leaderboard<small>Ranks completions inside the client team</small></span></label>
+          <label class="toggle"><input type="checkbox" id="b-cpd" checked><span class="toggle-ui" aria-hidden="true"></span><span class="toggle-text">CPD points<small>Issues 1.5 points on completion</small></span></label>
+          <label class="toggle"><input type="checkbox" id="b-debrief" checked><span class="toggle-ui" aria-hidden="true"></span><span class="toggle-text">Debrief call CTA<small>Adds a "book a debrief" button to the score screen</small></span></label>
+        </div>
+
+        <div class="builder-actions">
+          <button type="button" class="btn btn-primary" id="b-preview">Preview drill</button>
+          <button type="button" class="btn" id="b-reset">Reset form</button>
+        </div>
+      </form>
+
+      <div class="builder-preview">
+        <h2 class="card-title">Client preview</h2>
+        <p class="field-note">This is the invitation your client opens. It updates as you edit.</p>
+        <div class="intro-card card" id="preview-card">
+          <div class="intro-band" id="preview-band">
+            <span class="intro-firm" id="preview-firm">Harwood Kelly</span>
+            <span class="intro-kicker">Client preparedness programme</span>
+          </div>
+          <div class="intro-body">
+            <p class="intro-eyebrow" id="preview-eyebrow">Environmental</p>
+            <h3 class="intro-title" id="preview-title">EPA raid</h3>
+            <p class="intro-blurb" id="preview-blurb"></p>
+            <dl class="intro-meta">
+              <div><dt>For</dt><dd id="preview-client">Kalgoorlie Ridge Minerals</dd></div>
+              <div><dt>Cohort</dt><dd id="preview-cohort">Executive team</dd></div>
+              <div><dt>Level</dt><dd id="preview-difficulty">Standard</dd></div>
+              <div><dt>Time</dt><dd id="preview-time">35 min</dd></div>
+            </dl>
+            <ul class="chip-list" id="preview-chips"></ul>
+            <button type="button" class="intro-cta" id="preview-cta" disabled>Start the drill</button>
+            <p class="intro-foot" id="preview-foot">Provided to you by Harwood Kelly. Nothing you enter is shared outside your organisation.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================== SIGNALS =========== -->
+  <section class="panel" id="panel-signals" role="tabpanel" aria-labelledby="tab-signals" tabindex="-1" hidden>
+    <div class="panel-head">
+      <h1>Signals</h1>
+      <p class="lede">What nobody else can see: which of the firm's clients are worried about which regulatory risks, revealed by what they choose to drill on and where they fail.</p>
+    </div>
+
+    <section class="card chart-card" aria-labelledby="hm-title">
+      <div class="chart-head">
+        <div>
+          <h2 class="chart-title" id="hm-title">Drill engagement by client and risk area</h2>
+          <p class="chart-sub">Completed drills, July–August 2026. Select a cell to filter the signal inbox below.</p>
+        </div>
+        <button type="button" class="btn btn-small" id="hm-table-toggle" aria-expanded="false" aria-controls="hm-table">Show as table</button>
+      </div>
+
+      <div class="chart-scroll">
+        <div id="heatmap"></div>
+      </div>
+
+      <div class="chart-foot">
+        <div class="scale-legend" id="hm-legend" aria-hidden="true"></div>
+        <p class="chart-axis-note">Cell shade and number both show completed drills — colour is never the only channel.</p>
+      </div>
+
+      <div class="table-wrap" id="hm-table" hidden>
+        <table class="data-table compact">
+          <caption class="sr-only">Completed drills by client and risk area — table view of the heatmap.</caption>
+          <thead id="hm-table-head"></thead>
+          <tbody id="hm-table-body"></tbody>
+          <tfoot id="hm-table-foot"></tfoot>
+        </table>
+      </div>
+    </section>
+
+    <div class="filter-row" role="group" aria-label="Signal filters">
+      <div class="field">
+        <label for="f-priority">Priority</label>
+        <select id="f-priority">
+          <option value="">All priorities</option>
+          <option value="High">High</option>
+          <option value="Medium">Medium</option>
+          <option value="Low">Low</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="f-sig-client">Client</label>
+        <select id="f-sig-client"><option value="">All clients</option></select>
+      </div>
+      <div class="field grow">
+        <label for="f-sig-search">Search</label>
+        <input type="search" id="f-sig-search" placeholder="Signal, concern or owner…" autocomplete="off">
+      </div>
+      <button type="button" class="link-btn reset-btn" id="sig-reset" hidden>Reset filters</button>
+    </div>
+
+    <p class="active-filter" id="hm-selection" hidden></p>
+
+    <div class="table-wrap">
+      <table class="data-table" id="sig-table">
+        <caption class="sr-only">Business-development signals derived from drill results. Select a row for detail.</caption>
+        <thead>
+          <tr>
+            <th scope="col" data-key="client"><button type="button">Client</button></th>
+            <th scope="col" data-key="signal"><button type="button">Signal</button></th>
+            <th scope="col" data-key="area"><button type="button">Risk area</button></th>
+            <th scope="col" data-key="priority"><button type="button">Priority</button></th>
+            <th scope="col" data-key="owner"><button type="button">Owner</button></th>
+            <th scope="col" data-key="date"><button type="button">Raised</button></th>
+          </tr>
+        </thead>
+        <tbody id="sig-body"></tbody>
+      </table>
+      <p class="empty-state" id="sig-empty" hidden>No signals match those filters. <button type="button" class="link-btn" data-reset="sig">Reset filters</button></p>
+    </div>
+  </section>
+
+  <!-- =============================================== ABOUT ============= -->
+  <section class="panel" id="panel-about" role="tabpanel" aria-labelledby="tab-about" tabindex="-1" hidden>
+    <div class="panel-head">
+      <h1>About this play</h1>
+      <p class="lede">Training as the firm's marketing channel — the second-order move behind this demo.</p>
+    </div>
+
+    <div class="prose card">
+      <h2>The first-order idea, and the flip</h2>
+      <p>The first-order product is an AI training simulator that walks non-lawyers through the regulatory events that ruin quarters: an EPA raid, a serious workplace injury, a ransomware demand, an insolvency slide. Useful, but it sells into a budget line — corporate training — that nobody defends and everybody cuts.</p>
+      <p>The second-order play flips who pays and why. Law firms do not buy training tools for themselves; they buy business development. So you white-label the simulator and let the firm hand branded scenarios to its clients as a gift: <em>run your team through an EPA raid drill, courtesy of us.</em> You stop selling training and start being the layer firms market through.</p>
+
+      <h2>What the wedge accrues</h2>
+      <p>Two things compound. The first is the scenario library — every drill written, every branching path, every legal rationale, reusable across every firm on the platform. The second is distribution: each firm that white-labels arrives carrying its own client list, and every client team that runs a drill leaves behind engagement data the firm has never been able to get any other way.</p>
+
+      <h2>The two parties, and the knowledge in between</h2>
+      <p>On one side are law firms, who need credible, non-annoying reasons to call clients between matters. On the other are in-house teams, who want cheap preparedness they can show a board without commissioning a consulting project. The platform sits in the middle and learns something neither side would ever publish: which of a firm's clients are worried about which regulatory risks, revealed not by what they say but by what they choose to rehearse and where they fail. That is the Signals screen — six of nine failed the legal-privilege step is not a training result, it is a partner call with a reason attached.</p>
+
+      <h2>Endgame</h2>
+      <p>The business model is a per-firm white-label licence plus per-drill pricing, so revenue grows with the firm's client list rather than with its training budget. The defensible position is the scenario library multiplied by the distribution — a new entrant has neither, and cannot buy either quickly. The third-order move is that accumulated drill results become a demand signal in their own right: a live map of which companies are bracing for which regulatory problem, which is the raw material for a legal business-development exchange.</p>
+
+      <h2>What would validate it</h2>
+      <p>One BD director agreeing to send a branded drill to five clients. The whole thesis rests on a firm being willing to put its name on someone else's simulator. If the answer is "compliance would never approve the branding", the play collapses back to plain training SaaS — a much weaker business.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="app-footer">
+  <div class="footer-inner">
+    <p>Demo — all data is fictitious. Part of the second-order plays series.</p>
+    <a href="../index.html">&larr; All demos</a>
+  </div>
+</footer>
+
+<!-- ============================================ campaign detail panel -->
+<div class="overlay" id="overlay" hidden></div>
+
+<aside class="slideover" id="detail" role="dialog" aria-modal="true" aria-labelledby="detail-title" tabindex="-1" hidden>
+  <div class="slideover-head">
+    <div>
+      <p class="slideover-kicker" id="detail-kicker"></p>
+      <h2 id="detail-title"></h2>
+    </div>
+    <button type="button" class="icon-btn" id="detail-close" aria-label="Close detail panel">&times;</button>
+  </div>
+  <div class="slideover-body" id="detail-body"></div>
+</aside>
+
+<!-- ============================================ drill player modal ==== -->
+<div class="modal" id="drill-modal" role="dialog" aria-modal="true" aria-labelledby="drill-title" hidden>
+  <div class="modal-card" id="drill-card" tabindex="-1">
+    <div class="modal-head" id="drill-head">
+      <div>
+        <p class="modal-firm" id="drill-firm">Harwood Kelly</p>
+        <h2 id="drill-title">EPA raid</h2>
+      </div>
+      <button type="button" class="icon-btn on-brand" id="drill-close" aria-label="Close drill preview">&times;</button>
+    </div>
+    <div class="modal-progress" id="drill-progress" aria-hidden="true"></div>
+    <div class="modal-body" id="drill-body"></div>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip" aria-hidden="true" hidden></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

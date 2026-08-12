@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StatuteGraph — the legislation → document impact graph</title>
+<meta name="description" content="Demo of a legislation-to-document impact graph: statutory change mapped to the clause patterns and precedent families it touches.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand">
+      <span class="wordmark">Statute<span class="wordmark-accent">Graph</span></span>
+      <span class="tagline">The legislation → document impact graph</span>
+    </div>
+
+    <nav class="tabs" aria-label="Screens">
+      <div class="tabs-scroller" role="tablist">
+        <button class="tab" role="tab" id="tab-feed"  aria-controls="panel-feed"  aria-selected="true"  data-tab="feed">Impact Feed</button>
+        <button class="tab" role="tab" id="tab-graph" aria-controls="panel-graph" aria-selected="false" data-tab="graph" tabindex="-1">Graph</button>
+        <button class="tab" role="tab" id="tab-api"   aria-controls="panel-api"   aria-selected="false" data-tab="api"   tabindex="-1">API Feed</button>
+        <button class="tab" role="tab" id="tab-about" aria-controls="panel-about" aria-selected="false" data-tab="about" tabindex="-1">About this play</button>
+      </div>
+    </nav>
+
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false">
+      <span class="theme-icon" aria-hidden="true">◐</span>
+      <span class="theme-label" id="theme-label">Dark</span>
+    </button>
+  </div>
+</header>
+
+<main id="main" class="page">
+
+  <!-- ============================= IMPACT FEED ============================= -->
+  <section class="panel" id="panel-feed" role="tabpanel" aria-labelledby="tab-feed" tabindex="-1">
+    <div class="panel-head">
+      <h1 class="panel-title">Impact feed</h1>
+      <p class="panel-sub">Every amendment gazetted in the last 12 months, scored by how much of the precedent corpus it moves. Click a row for the change note and the affected clause patterns.</p>
+    </div>
+
+    <div class="filter-row" role="search">
+      <div class="field field-search">
+        <label class="field-label" for="feed-search">Search</label>
+        <input class="input" type="search" id="feed-search" placeholder="Instrument, practice area…" autocomplete="off">
+      </div>
+      <div class="field">
+        <label class="field-label" for="filter-jurisdiction">Jurisdiction</label>
+        <select class="select" id="filter-jurisdiction"><option value="">All jurisdictions</option></select>
+      </div>
+      <div class="field">
+        <label class="field-label" for="filter-practice">Practice area</label>
+        <select class="select" id="filter-practice"><option value="">All practice areas</option></select>
+      </div>
+      <div class="field">
+        <label class="field-label" for="filter-severity">Severity</label>
+        <select class="select" id="filter-severity"><option value="">All severities</option></select>
+      </div>
+      <button class="link-button" type="button" id="reset-filters" hidden>Reset filters</button>
+    </div>
+
+    <div class="stat-row" id="feed-stats">
+      <div class="stat">
+        <span class="stat-label">Amendments shown</span>
+        <span class="stat-value" id="stat-amendments">30</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Clause patterns touched</span>
+        <span class="stat-value" id="stat-patterns">110</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Template families affected</span>
+        <span class="stat-value" id="stat-families">0</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Critical or high</span>
+        <span class="stat-value" id="stat-critical">0</span>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="data-table" id="feed-table">
+        <caption class="visually-hidden">Legislative amendments and the precedent documents they affect. Column headers sort the table.</caption>
+        <thead>
+          <tr>
+            <th scope="col" aria-sort="none"><button type="button" class="th-button" data-sort="instrument">Instrument <span class="sort-arrow" aria-hidden="true"></span></button></th>
+            <th scope="col" aria-sort="none"><button type="button" class="th-button" data-sort="jurisdiction">Jurisdiction <span class="sort-arrow" aria-hidden="true"></span></button></th>
+            <th scope="col" aria-sort="none"><button type="button" class="th-button" data-sort="practiceAreas">Practice areas touched <span class="sort-arrow" aria-hidden="true"></span></button></th>
+            <th scope="col" class="num" aria-sort="none"><button type="button" class="th-button" data-sort="clausePatternCount">Clause patterns <span class="sort-arrow" aria-hidden="true"></span></button></th>
+            <th scope="col" class="num" aria-sort="none"><button type="button" class="th-button" data-sort="docTypeCount">Document types <span class="sort-arrow" aria-hidden="true"></span></button></th>
+            <th scope="col" aria-sort="none"><button type="button" class="th-button" data-sort="severity">Severity <span class="sort-arrow" aria-hidden="true"></span></button></th>
+            <th scope="col" aria-sort="descending"><button type="button" class="th-button" data-sort="commencement">Commencement <span class="sort-arrow" aria-hidden="true">▼</span></button></th>
+          </tr>
+        </thead>
+        <tbody id="feed-body"></tbody>
+      </table>
+      <p class="empty-state" id="feed-empty" hidden>No results for these filters. <button type="button" class="link-button" id="empty-reset">Reset filters</button></p>
+    </div>
+  </section>
+
+  <!-- ================================ GRAPH ================================ -->
+  <section class="panel" id="panel-graph" role="tabpanel" aria-labelledby="tab-graph" tabindex="-1" hidden>
+    <div class="panel-head">
+      <h1 class="panel-title">Impact graph</h1>
+      <p class="panel-sub">Provisions on the left, precedent document types on the right. Each edge is one provision reaching one document type; the thickness is the number of clause patterns on that link.</p>
+    </div>
+
+    <div class="filter-row">
+      <div class="field field-wide">
+        <label class="field-label" for="graph-select">Amendment to visualise</label>
+        <select class="select" id="graph-select"></select>
+      </div>
+      <button class="link-button" type="button" id="graph-clear" hidden>Clear node selection</button>
+    </div>
+
+    <div class="card chart-card">
+      <div class="chart-head">
+        <h2 class="chart-title" id="graph-title">Top 8 provisions by affected clause patterns — whole corpus</h2>
+        <p class="chart-sub" id="graph-sub">Hover an edge for the clause-pattern count. Click a node to isolate its edges; click again to release.</p>
+      </div>
+      <div class="graph-scroll">
+        <svg id="graph-svg" class="graph-svg" viewBox="0 0 900 560" role="group" aria-labelledby="graph-title" preserveAspectRatio="xMidYMid meet"></svg>
+      </div>
+      <div class="table-wrap chart-table-wrap">
+        <details class="chart-table">
+          <summary>Table view — every edge in this graph</summary>
+          <table class="data-table compact">
+            <thead><tr><th scope="col">Provision</th><th scope="col">Document type</th><th scope="col" class="num">Clause patterns</th></tr></thead>
+            <tbody id="graph-edge-table"></tbody>
+          </table>
+          <p class="table-total" id="graph-edge-total"></p>
+        </details>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="card chart-card">
+        <div class="chart-head">
+          <h2 class="chart-title">Amendments by month</h2>
+          <p class="chart-sub">Last 12 months to August 2026 · whole corpus, all jurisdictions</p>
+        </div>
+        <svg id="bar-svg" class="chart-svg" viewBox="0 0 620 300" role="group" aria-label="Column chart of amendments commencing each month from September 2025 to August 2026." preserveAspectRatio="xMidYMid meet"></svg>
+        <details class="chart-table">
+          <summary>Table view</summary>
+          <div class="table-wrap">
+            <table class="data-table compact narrow">
+              <thead><tr><th scope="col">Month</th><th scope="col" class="num">Amendments</th></tr></thead>
+              <tbody id="bar-table"></tbody>
+            </table>
+            <p class="table-total" id="bar-total"></p>
+          </div>
+        </details>
+      </div>
+
+      <div class="card chart-card">
+        <div class="chart-head">
+          <h2 class="chart-title">Affected clause patterns by practice area</h2>
+          <p class="chart-sub">Whole corpus · 110 clause patterns across 30 amendments</p>
+        </div>
+        <div class="donut-layout">
+          <svg id="donut-svg" class="chart-svg donut" viewBox="0 0 260 260" role="group" aria-label="Donut chart of affected clause patterns split by practice area." preserveAspectRatio="xMidYMid meet"></svg>
+          <ul class="legend" id="donut-legend"></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================== API FEED =============================== -->
+  <section class="panel" id="panel-api" role="tabpanel" aria-labelledby="tab-api" tabindex="-1" hidden>
+    <div class="panel-head">
+      <h1 class="panel-title">API feed</h1>
+      <p class="panel-sub">The same graph, sold as a feed. Build a request, run it, and see the response a DMS or CLM vendor would embed.</p>
+    </div>
+
+    <div class="console">
+      <div class="card console-builder">
+        <h2 class="card-title">Request builder</h2>
+        <div class="field">
+          <label class="field-label" for="api-endpoint">Endpoint</label>
+          <select class="select" id="api-endpoint">
+            <option value="impacts">GET /v1/impacts</option>
+            <option value="documents">GET /v1/provisions/{id}/documents</option>
+          </select>
+        </div>
+        <div class="field" id="field-jurisdiction">
+          <label class="field-label" for="api-jurisdiction">Jurisdiction</label>
+          <select class="select" id="api-jurisdiction"><option value="">any</option></select>
+        </div>
+        <div class="field" id="field-since">
+          <label class="field-label" for="api-since">Since</label>
+          <select class="select" id="api-since">
+            <option value="2026-08-01">2026-08-01</option>
+            <option value="2026-07-01" selected>2026-07-01</option>
+            <option value="2026-04-01">2026-04-01</option>
+            <option value="2026-01-01">2026-01-01</option>
+            <option value="2025-09-01">2025-09-01</option>
+          </select>
+        </div>
+        <div class="field" id="field-severity">
+          <label class="field-label" for="api-severity">Minimum severity</label>
+          <select class="select" id="api-severity">
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High" selected>High</option>
+            <option value="Critical">Critical</option>
+          </select>
+        </div>
+        <div class="field" id="field-provision">
+          <label class="field-label" for="api-provision">Provision id</label>
+          <select class="select" id="api-provision"></select>
+        </div>
+        <button class="btn btn-primary" type="button" id="api-run">Run request</button>
+        <p class="hint" id="api-hint">Responses are generated from this demo’s local dataset — nothing leaves the page.</p>
+      </div>
+
+      <div class="card console-response">
+        <div class="response-head">
+          <h2 class="card-title">Response</h2>
+          <span class="status-pill" id="api-status">200 OK</span>
+        </div>
+        <p class="request-line"><code id="api-request-line">GET /v1/impacts</code></p>
+        <pre class="json" id="api-json" tabindex="0" aria-live="polite"></pre>
+      </div>
+    </div>
+
+    <h2 class="section-title">Pricing</h2>
+    <p class="section-sub">Per-seat revenue is the wedge. Per-call licensing to other vendors is the business.</p>
+    <div class="pricing-grid" id="pricing-grid"></div>
+  </section>
+
+  <!-- ============================= ABOUT THIS PLAY ============================= -->
+  <section class="panel" id="panel-about" role="tabpanel" aria-labelledby="tab-about" tabindex="-1" hidden>
+    <div class="panel-head">
+      <h1 class="panel-title">About this play</h1>
+      <p class="panel-sub">The second-order thesis behind StatuteGraph, in plain English.</p>
+    </div>
+
+    <div class="prose">
+      <h2>The first-order wedge</h2>
+      <p>The obvious product is a tool that updates a law firm’s precedent documents when legislation changes. A statute is amended, the tool finds the clauses in the firm’s templates that no longer work, and proposes a redline. Firms buy it per seat, because keeping a precedent bank current is expensive, dull, and the sort of work that quietly slips until something goes wrong.</p>
+
+      <h2>What the wedge actually accrues</h2>
+      <p>To do that job at all, the tool has to build a map: which legislative provisions touch which clause patterns in which kinds of document. That map is the real asset, and it is the thing nobody currently owns, because nobody else sits inside the update workflow. Every time a lawyer accepts or rejects a proposed change, the system gets a labelled edge between a provision and a clause — a piece of ground truth that cannot be scraped, only earned by being in the loop. The redlines are the by-product; the graph is what compounds.</p>
+
+      <h2>The two parties it connects</h2>
+      <p>On one side are the legislative and regulatory feeds: bills, gazettals, commencement dates, explanatory memoranda. On the other side is every product that touches a document — document management systems, contract lifecycle tools, drafting assistants, in-house legal teams, and rival firms. Those products all face the same question and none of them can answer it: when this amendment commences, which of my templates break? StatuteGraph is the layer that sits between the two and answers it in a form software can consume.</p>
+
+      <h2>The endgame</h2>
+      <p>Bloomberg for statutory change impact. Seats fund the build and keep the labelling flowing; the licensed feed is the business, priced per call to vendors who would rather buy the map than build it. Churn stays low because the graph gets better with age and leaving means losing the history behind every edge. The thing that would validate it is narrow and testable: get one document management or contract lifecycle vendor to say they would pay for a feed telling them which templates a bill amendment touches — and ask that before building anything past the prototype.</p>
+    </div>
+  </section>
+
+</main>
+
+<!-- Slide-over detail panel -->
+<div class="overlay" id="overlay" hidden></div>
+<aside class="slideover" id="slideover" role="dialog" aria-modal="true" aria-labelledby="slideover-title" hidden>
+  <div class="slideover-head">
+    <div>
+      <p class="slideover-eyebrow" id="slideover-eyebrow"></p>
+      <h2 class="slideover-title" id="slideover-title"></h2>
+    </div>
+    <button class="icon-button" type="button" id="slideover-close" aria-label="Close detail panel">✕</button>
+  </div>
+  <div class="slideover-body" id="slideover-body"></div>
+</aside>
+
+<!-- Visual hover affordance only: every value it shows is also on the mark's
+     aria-label, a direct label, or the chart's table view. -->
+<div class="tooltip" id="tooltip" aria-hidden="true" hidden></div>
+
+<footer class="site-footer">
+  <p>Demo — all data is fictitious. Part of the second-order plays series.</p>
+  <p><a href="../index.html">← All demos</a></p>
+</footer>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

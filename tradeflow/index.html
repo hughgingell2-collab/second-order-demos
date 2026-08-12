@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TradeFlow — maintenance triage as a job marketplace</title>
+<meta name="description" content="Demo: property-management maintenance triage that originates scoped, owner-approved jobs and routes them to a vetted tradie network.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="header-top">
+    <div class="brand">
+      <span class="wordmark">Trade<span class="wordmark-accent">Flow</span></span>
+      <span class="tagline">Every triaged request is a job. Every job is the market.</span>
+    </div>
+    <div class="header-controls">
+      <div class="segmented" role="group" aria-label="Perspective">
+        <button type="button" class="seg-btn" id="segPm" data-view="pm" aria-pressed="true">Property manager</button>
+        <button type="button" class="seg-btn" id="segTradie" data-view="tradie" aria-pressed="false">Tradie</button>
+      </div>
+      <button type="button" class="theme-toggle" id="themeToggle" aria-pressed="false">
+        <span class="theme-icon" aria-hidden="true">◐</span><span id="themeLabel">Dark</span>
+      </button>
+    </div>
+  </div>
+  <nav class="tabs-wrap" aria-label="Screens">
+    <div class="tabs" role="tablist" id="tabList"></div>
+  </nav>
+  <p class="context-line" id="contextLine"></p>
+</header>
+
+<main id="main">
+
+  <!-- ================= PM · TRIAGE INBOX ================= -->
+  <section class="panel" id="panel-triage" role="tabpanel" aria-labelledby="tab-triage" tabindex="-1" hidden>
+    <div class="panel-head">
+      <h1>Triage inbox</h1>
+      <p class="lede">Tenant requests arrive as email and SMS. Each one is read, classified, scoped against the owner's
+        approval limit and turned into a job before any tradie knows it exists.</p>
+    </div>
+
+    <div class="filter-bar" role="group" aria-label="Filter requests">
+      <div class="field">
+        <label for="fTriageTrade">Trade</label>
+        <select id="fTriageTrade"></select>
+      </div>
+      <div class="field">
+        <label for="fTriageUrgency">Urgency</label>
+        <select id="fTriageUrgency"></select>
+      </div>
+      <div class="field">
+        <label for="fTriageStatus">Status</label>
+        <select id="fTriageStatus"></select>
+      </div>
+      <div class="field field-search">
+        <label for="fTriageSearch">Search</label>
+        <input type="search" id="fTriageSearch" placeholder="address, tenant, job…" autocomplete="off">
+      </div>
+      <button type="button" class="link-btn reset-btn" id="fTriageReset" hidden>Reset filters</button>
+    </div>
+
+    <p class="result-count" id="triageCount" aria-live="polite"></p>
+
+    <div class="table-wrap">
+      <table class="data-table" id="triageTable">
+        <caption class="sr-only">Incoming tenant maintenance requests</caption>
+        <thead>
+          <tr>
+            <th scope="col"><button type="button" class="th-sort" data-key="received">Received</button></th>
+            <th scope="col"><button type="button" class="th-sort" data-key="address">Property</button></th>
+            <th scope="col"><button type="button" class="th-sort" data-key="title">Scoped job</button></th>
+            <th scope="col"><button type="button" class="th-sort" data-key="trade">Trade</button></th>
+            <th scope="col"><button type="button" class="th-sort" data-key="urgency">Urgency</button></th>
+            <th scope="col" class="num"><button type="button" class="th-sort" data-key="cap">Approved to</button></th>
+            <th scope="col"><button type="button" class="th-sort" data-key="status">Status</button></th>
+            <th scope="col"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody id="triageBody"></tbody>
+      </table>
+    </div>
+    <div class="empty-state" id="triageEmpty" hidden>
+      <p><strong>No results.</strong> No request matches every filter you've set.</p>
+      <button type="button" class="btn btn-secondary" data-reset="triage">Reset filters</button>
+    </div>
+  </section>
+
+  <!-- ================= PM · PORTFOLIO ================= -->
+  <section class="panel" id="panel-portfolio" role="tabpanel" aria-labelledby="tab-portfolio" tabindex="-1" hidden>
+    <div class="panel-head">
+      <h1>Portfolio</h1>
+      <p class="lede">Twelve months of completed maintenance across the managed portfolio. Every job in these charts is
+        also a priced row in the price book — <span id="reconcileNote"></span></p>
+    </div>
+
+    <div class="filter-bar" role="group" aria-label="Filter portfolio">
+      <div class="field">
+        <label for="fPortTrade">Trade</label>
+        <select id="fPortTrade"></select>
+      </div>
+      <div class="field">
+        <label for="fPortSuburb">Suburb</label>
+        <select id="fPortSuburb"></select>
+      </div>
+      <button type="button" class="link-btn reset-btn" id="fPortReset" hidden>Reset filters</button>
+      <p class="filter-hint">Filters scope the tiles and all three charts.</p>
+    </div>
+
+    <div class="kpi-row" id="portKpis"></div>
+
+    <div class="chart-grid">
+      <section class="card chart-card chart-wide">
+        <div class="card-head">
+          <h2>Jobs per month by trade</h2>
+          <p class="card-sub" id="jobsChartSub"></p>
+        </div>
+        <div class="chart" id="chartJobs"></div>
+        <div class="legend" id="legendJobs"></div>
+        <details class="disclosure"><summary>Show data table</summary><div class="table-wrap" id="dtJobs"></div></details>
+      </section>
+
+      <section class="card chart-card">
+        <div class="card-head">
+          <h2>Average time to fix</h2>
+          <p class="card-sub">Days from tenant request to job completed, by month.</p>
+        </div>
+        <div class="chart" id="chartDays"></div>
+        <details class="disclosure"><summary>Show data table</summary><div class="table-wrap" id="dtDays"></div></details>
+      </section>
+
+      <section class="card chart-card">
+        <div class="card-head">
+          <h2>Spend by trade</h2>
+          <p class="card-sub" id="donutSub">Twelve months of completed-job invoices.</p>
+        </div>
+        <div class="chart" id="chartSpend"></div>
+        <div class="legend" id="legendSpend"></div>
+        <details class="disclosure"><summary>Show data table</summary><div class="table-wrap" id="dtSpend"></div></details>
+      </section>
+    </div>
+  </section>
+
+  <!-- ================= PM · PRICE BOOK ================= -->
+  <section class="panel" id="panel-pricebook" role="tabpanel" aria-labelledby="tab-pricebook" tabindex="-1" hidden>
+    <div class="panel-head">
+      <h1>Price book</h1>
+      <p class="lede">What jobs actually cost, by job type and suburb, from invoices the portfolio has already paid.</p>
+    </div>
+
+    <div class="callout">
+      <span class="callout-mark" aria-hidden="true">◆</span>
+      <p><strong>Priced from <span id="priceBookN">—</span> real portfolio jobs.</strong>
+         hipages sells leads and quotes. These are completed-job prices — what the work cost after it was done,
+         in the suburb it was done in.</p>
+    </div>
+
+    <section class="card chart-card">
+      <div class="card-head">
+        <h2>Median job cost — trade by suburb</h2>
+        <p class="card-sub">Shade = median cost of a completed job. Select a cell to filter the table below.</p>
+      </div>
+      <div class="chart" id="chartHeat"></div>
+      <div class="legend" id="legendHeat"></div>
+      <details class="disclosure"><summary>Show data table</summary><div class="table-wrap" id="dtHeat"></div></details>
+    </section>
+
+    <div class="filter-bar" role="group" aria-label="Filter price book">
+      <div class="field">
+        <label for="fPriceTrade">Trade</label>
+        <select id="fPriceTrade"></select>
+      </div>
+      <div class="field">
+        <label for="fPriceSuburb">Suburb</label>
+        <select id="fPriceSuburb"></select>
+      </div>
+      <div class="field field-search">
+        <label for="fPriceSearch">Search</label>
+        <input type="search" id="fPriceSearch" placeholder="job type or suburb…" autocomplete="off">
+      </div>
+      <button type="button" class="link-btn reset-btn" id="fPriceReset" hidden>Reset filters</button>
+    </div>
+
+    <p class="result-count" id="priceCount" aria-live="polite"></p>
+
+    <div class="table-wrap">
+      <table class="data-table" id="priceTable">
+        <caption class="sr-only">Cost benchmarks by job type and suburb</caption>
+        <thead>
+          <tr>
+            <th scope="col"><button type="button" class="th-sort" data-key="typeLabel">Job type</button></th>
+            <th scope="col"><button type="button" class="th-sort" data-key="tradeLabel">Trade</button></th>
+            <th scope="col"><button type="button" class="th-sort" data-key="suburb">Suburb</button></th>
+            <th scope="col" class="num"><button type="button" class="th-sort" data-key="median">Median</button></th>
+            <th scope="col" class="col-range">Range p25–p75</th>
+            <th scope="col" class="num"><button type="button" class="th-sort" data-key="n">Jobs</button></th>
+            <th scope="col" class="num"><button type="button" class="th-sort" data-key="trend">Trend</button></th>
+            <th scope="col"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody id="priceBody"></tbody>
+      </table>
+    </div>
+    <div class="empty-state" id="priceEmpty" hidden>
+      <p><strong>No results.</strong> No priced row matches every filter you've set.</p>
+      <button type="button" class="btn btn-secondary" data-reset="price">Reset filters</button>
+    </div>
+  </section>
+
+  <!-- ================= TRADIE · JOB FEED ================= -->
+  <section class="panel" id="panel-feed" role="tabpanel" aria-labelledby="tab-feed" tabindex="-1" hidden>
+    <div class="panel-head">
+      <h1>Job feed</h1>
+      <p class="lede" id="feedLede"></p>
+    </div>
+
+    <div class="banner">
+      <span class="banner-mark" aria-hidden="true">✓</span>
+      <p><strong>These are jobs, not leads.</strong> Every item below has been scoped and approved by the owner before
+        you see it. No bidding, no quote race, no paying for a phone number.</p>
+    </div>
+
+    <div class="filter-bar" role="group" aria-label="Filter job feed">
+      <div class="field">
+        <label for="fFeedTrade">Trade</label>
+        <select id="fFeedTrade"></select>
+        <p class="field-note" id="tradeLockNote">Locked to your licensed trade. Add trades in your profile.</p>
+      </div>
+      <div class="field">
+        <label for="fFeedSuburb">Suburb</label>
+        <select id="fFeedSuburb"></select>
+      </div>
+      <div class="field">
+        <label for="fFeedValue">Min job value</label>
+        <select id="fFeedValue"></select>
+      </div>
+      <div class="field field-search">
+        <label for="fFeedSearch">Search</label>
+        <input type="search" id="fFeedSearch" placeholder="job or agency…" autocomplete="off">
+      </div>
+      <button type="button" class="link-btn reset-btn" id="fFeedReset" hidden>Reset filters</button>
+    </div>
+
+    <p class="result-count" id="feedCount" aria-live="polite"></p>
+
+    <div class="table-wrap">
+      <table class="data-table" id="feedTable">
+        <caption class="sr-only">Scoped, owner-approved jobs available to accept</caption>
+        <thead>
+          <tr>
+            <th scope="col"><button type="button" class="th-sort" data-key="title">Job</button></th>
+            <th scope="col"><button type="button" class="th-sort" data-key="suburb">Suburb</button></th>
+            <th scope="col"><button type="button" class="th-sort" data-key="agency">Portfolio</button></th>
+            <th scope="col"><button type="button" class="th-sort" data-key="when">When</button></th>
+            <th scope="col" class="num"><button type="button" class="th-sort" data-key="cap">Approved to</button></th>
+            <th scope="col"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody id="feedBody"></tbody>
+      </table>
+    </div>
+    <div class="empty-state" id="feedEmpty" hidden>
+      <p><strong>No results.</strong> No open job matches every filter you've set.</p>
+      <button type="button" class="btn btn-secondary" data-reset="feed">Reset filters</button>
+    </div>
+
+    <section class="card schedule-card">
+      <div class="card-head">
+        <h2>My schedule</h2>
+        <p class="card-sub">Jobs you've accepted. Accepting locks the job to you — the agency is notified immediately.</p>
+      </div>
+      <ul class="schedule-list" id="scheduleList"></ul>
+      <p class="muted-note" id="scheduleEmpty">Nothing accepted yet. Accept a job above and it lands here.</p>
+    </section>
+  </section>
+
+  <!-- ================= TRADIE · MY FLOW ================= -->
+  <section class="panel" id="panel-flow" role="tabpanel" aria-labelledby="tab-flow" tabindex="-1" hidden>
+    <div class="panel-head">
+      <h1>My flow</h1>
+      <p class="lede">One-off jobs arrive once and end. Portfolio jobs arrive every month, from the same handful of
+        agencies, at a price you already know.</p>
+    </div>
+
+    <div class="kpi-row" id="flowKpis"></div>
+
+    <div class="chart-grid">
+      <section class="card chart-card chart-wide">
+        <div class="card-head">
+          <h2>Where your jobs come from</h2>
+          <p class="card-sub">Jobs completed each month, split by source.</p>
+        </div>
+        <div class="chart" id="chartSource"></div>
+        <div class="legend" id="legendSource"></div>
+        <details class="disclosure"><summary>Show data table</summary><div class="table-wrap" id="dtSource"></div></details>
+      </section>
+
+      <section class="card chart-card chart-wide">
+        <div class="card-head">
+          <h2>Revenue through TradeFlow</h2>
+          <p class="card-sub">Invoiced value of portfolio jobs booked through the platform, by month.</p>
+        </div>
+        <div class="chart" id="chartRevenue"></div>
+        <details class="disclosure"><summary>Show data table</summary><div class="table-wrap" id="dtRevenue"></div></details>
+      </section>
+    </div>
+
+    <section class="card roi-card" id="roiCard"></section>
+  </section>
+
+  <!-- ================= ABOUT ================= -->
+  <section class="panel" id="panel-about" role="tabpanel" aria-labelledby="tab-about" tabindex="-1" hidden>
+    <div class="panel-head">
+      <h1>About this play</h1>
+      <p class="lede">The second-order thesis behind this demo, in plain English.</p>
+    </div>
+
+    <div class="prose">
+      <h2>The first-order wedge</h2>
+      <p>The obvious product is an AI assistant for residential property managers: it reads the tenant emails, drafts the
+        replies, and handles the maintenance requests. That is useful on day one for a single agency with nobody else on
+        the platform, which is what makes it a viable way in. It is also not the business.</p>
+
+      <h2>What the wedge quietly accrues</h2>
+      <p>Triaging a maintenance request produces something valuable as a by-product: a job. Not a lead, not an enquiry — a
+        specific piece of work at a specific address, already classified by trade, already scoped, already approved by the
+        owner to a dollar figure, with the tenant's availability attached. A single agency running 300 properties throws
+        off more repeat trade work in a year than thousands of one-off consumers. It also accrues the thing nobody else
+        has: what those jobs actually cost, by trade, by suburb, after the work was done.</p>
+
+      <h2>The two parties it connects</h2>
+      <p>On one side, property managers, who hate chasing three quotes for a $300 job and would rather the system just
+        book someone reliable. On the other, tradies, who currently pay lead-generation platforms for a phone number and a
+        bidding war. Marketplaces like hipages and ServiceSeeking sell consumer leads one at a time. This arrives with
+        recurring, portfolio-scale flow — pre-scoped, pre-funded jobs that show up every week from the same agencies.
+        That asymmetry is why the tradie side is the one willing to pay.</p>
+
+      <h2>Endgame</h2>
+      <p>Give the PM assistant away cheaply — it solves the cold-start problem by being worth using with zero tradies on
+        the network. Once job flow exists, charge the tradie side: a subscription for guaranteed portfolio flow, or a
+        take-rate on the work. The third-order prize is the pricing dataset itself, which underwrites instant quoting and
+        maintenance-warranty products nobody can price without it.</p>
+
+      <h2>What would validate it</h2>
+      <p>Two conversations. A property manager confirming they would accept an auto-suggested tradie for sub-$500 jobs
+        without collecting quotes. And one tradie saying what they would pay per month for guaranteed portfolio flow.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <p>Demo — all data is fictitious. Part of the second-order plays series.</p>
+  <p><a href="../index.html">← All demos</a></p>
+</footer>
+
+<!-- Slide-over detail panel -->
+<div class="scrim" id="scrim" hidden></div>
+<aside class="slideover" id="slideover" role="dialog" aria-modal="true" aria-labelledby="slideoverTitle" hidden>
+  <div class="slideover-head">
+    <h2 id="slideoverTitle">Detail</h2>
+    <button type="button" class="icon-btn" id="slideoverClose" aria-label="Close detail panel">✕</button>
+  </div>
+  <div class="slideover-body" id="slideoverBody"></div>
+</aside>
+
+<div class="chart-tip" id="chartTip" role="tooltip" hidden></div>
+<div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="false"></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

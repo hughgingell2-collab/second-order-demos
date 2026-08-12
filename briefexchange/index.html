@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BriefExchange — one funnel, then the market</title>
+<meta name="description" content="Demo of a legal BD operating system that becomes a legal work exchange. All data fictitious.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="app-header">
+  <div class="header-inner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="24" height="24" focusable="false"><path d="M3 7.5 12 3l9 4.5-9 4.5-9-4.5Z" fill="currentColor" opacity=".9"/><path d="M3 12.5 12 17l9-4.5M3 16.5 12 21l9-4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="brand-text">
+        <span class="wordmark">BriefExchange</span>
+        <span class="tagline">One funnel. Then the market.</span>
+      </span>
+    </div>
+
+    <div class="header-controls">
+      <div class="segmented" role="group" aria-label="Switch between firm and client view">
+        <button type="button" class="seg-btn" data-view="firm" aria-pressed="true">Firm view</button>
+        <button type="button" class="seg-btn" data-view="client" aria-pressed="false">Client (GC) view</button>
+      </div>
+      <button type="button" id="theme-toggle" class="icon-btn" aria-pressed="false" title="Switch to dark theme">
+        <span class="theme-icon" aria-hidden="true">
+          <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" focusable="false"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></g></svg>
+          <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" focusable="false"><path d="M20 14.4A8.4 8.4 0 0 1 9.6 4a8.4 8.4 0 1 0 10.4 10.4Z" fill="currentColor"/></svg>
+        </span>
+        <span id="theme-label">Dark</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="tabs-wrap">
+    <div class="tabs" id="tablist" role="tablist" aria-label="Screens"></div>
+  </div>
+</header>
+
+<main id="main" class="container">
+
+  <!-- ============================================================ SIGNALS -->
+  <section id="panel-signals" class="panel" role="tabpanel" aria-labelledby="tab-signals" tabindex="-1" hidden>
+    <div class="panel-head">
+      <h1>Origination signals</h1>
+      <p class="lede">Public filings, announcements and tenders scored against Calder Reeve&rsquo;s credentials library. 35 matched signals, 22 June &ndash; 16 August 2026.</p>
+    </div>
+
+    <div class="stat-row" id="signal-stats"></div>
+
+    <div class="filter-bar" role="search">
+      <div class="field">
+        <label for="f-sig-source">Source</label>
+        <select id="f-sig-source"><option value="">All sources</option></select>
+      </div>
+      <div class="field">
+        <label for="f-sig-need">Practice area</label>
+        <select id="f-sig-need"><option value="">All practice areas</option></select>
+      </div>
+      <div class="field">
+        <label for="f-sig-qual">Qualification</label>
+        <select id="f-sig-qual">
+          <option value="">All signals</option>
+          <option value="yes">Qualified (score &ge; 70)</option>
+          <option value="no">Below threshold</option>
+        </select>
+      </div>
+      <div class="field grow">
+        <label for="f-sig-q">Search</label>
+        <input type="search" id="f-sig-q" placeholder="Company, signal or partner">
+      </div>
+      <button type="button" class="reset-link" id="f-sig-reset" hidden>Reset filters</button>
+    </div>
+
+    <div class="table-wrap">
+      <table class="data-table" id="tbl-signals">
+        <caption class="sr-only">Origination signals. Select a row to open the match detail.</caption>
+        <thead>
+          <tr>
+            <th scope="col" data-key="date"><button type="button">Date</button></th>
+            <th scope="col" data-key="source"><button type="button">Source</button></th>
+            <th scope="col" data-key="company"><button type="button">Company</button></th>
+            <th scope="col" data-key="summary" class="col-wide"><button type="button">Signal</button></th>
+            <th scope="col" data-key="need"><button type="button">Inferred need</button></th>
+            <th scope="col" data-key="score" class="col-num"><button type="button">Match score</button></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p class="empty-state" hidden>No signals match those filters. <button type="button" class="linkish">Reset filters</button></p>
+    </div>
+  </section>
+
+  <!-- ============================================================ PIPELINE -->
+  <section id="panel-pipeline" class="panel" role="tabpanel" aria-labelledby="tab-pipeline" tabindex="-1" hidden>
+    <div class="panel-head">
+      <h1>Pipeline</h1>
+      <p class="lede">Every stage below is the same data moving through one funnel: the origination agent finds it, the pursuits engine drafts it, the marketing engine keeps the firm visible between the two.</p>
+    </div>
+
+    <div class="stat-row" id="pipeline-stats"></div>
+
+    <div class="chart-grid">
+      <figure class="card chart-card">
+        <figcaption>
+          <h2>Signal-to-win funnel</h2>
+          <p class="chart-sub">Counts are live from the signals feed and the pursuits table. Qualified means a match score of 70 or above.</p>
+        </figcaption>
+        <div class="chart-host" id="chart-funnel"></div>
+      </figure>
+
+      <figure class="card chart-card">
+        <figcaption>
+          <h2>Matched signals per week, by source</h2>
+          <p class="chart-sub">Eight weeks to 16 August 2026. Series totals sum to the 35 signals in the feed.</p>
+        </figcaption>
+        <div class="chart-host" id="chart-weekly"></div>
+        <div class="legend" id="legend-weekly"></div>
+        <div class="chart-actions">
+          <button type="button" class="linkish" id="toggle-weekly-table" aria-expanded="false" aria-controls="weekly-table-wrap">Show data table</button>
+        </div>
+        <div class="table-wrap tight" id="weekly-table-wrap" hidden></div>
+      </figure>
+    </div>
+
+    <h2 class="section-title">Live pursuits</h2>
+    <div class="filter-bar">
+      <div class="field">
+        <label for="f-pur-stage">Stage</label>
+        <select id="f-pur-stage"><option value="">All stages</option></select>
+      </div>
+      <div class="field">
+        <label for="f-pur-practice">Practice area</label>
+        <select id="f-pur-practice"><option value="">All practice areas</option></select>
+      </div>
+      <div class="field">
+        <label for="f-pur-owner">Partner</label>
+        <select id="f-pur-owner"><option value="">All partners</option></select>
+      </div>
+      <button type="button" class="reset-link" id="f-pur-reset" hidden>Reset filters</button>
+    </div>
+
+    <div class="table-wrap">
+      <table class="data-table" id="tbl-pursuits">
+        <caption class="sr-only">Pursuits drafted by the pursuits engine.</caption>
+        <thead>
+          <tr>
+            <th scope="col" data-key="opportunity" class="col-wide"><button type="button">Opportunity</button></th>
+            <th scope="col" data-key="client"><button type="button">Client</button></th>
+            <th scope="col" data-key="practice"><button type="button">Practice</button></th>
+            <th scope="col" data-key="stage"><button type="button">Stage</button></th>
+            <th scope="col" data-key="value" class="col-num"><button type="button">Value estimate</button></th>
+            <th scope="col" data-key="owner"><button type="button">Owner</button></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot></tfoot>
+      </table>
+      <p class="empty-state" hidden>No pursuits match those filters. <button type="button" class="linkish">Reset filters</button></p>
+    </div>
+  </section>
+
+  <!-- ============================================================ EXCHANGE -->
+  <section id="panel-exchange" class="panel" role="tabpanel" aria-labelledby="tab-exchange" tabindex="-1" hidden>
+    <div class="banner">
+      <strong>The exchange is where the OS is headed &mdash; supply side already on-platform.</strong>
+      <span>Firms run their BD here first. Once enough of them do, in-house teams post the work directly and respond through the pursuits engine they already use.</span>
+    </div>
+
+    <div class="panel-head">
+      <h1>Brief board</h1>
+      <p class="lede">Live briefs posted by in-house teams, scored against Calder Reeve&rsquo;s credentials library the same way signals are.</p>
+    </div>
+
+    <div class="stat-row" id="exchange-stats"></div>
+
+    <div class="filter-bar" role="search">
+      <div class="field">
+        <label for="f-bx-practice">Practice area</label>
+        <select id="f-bx-practice"><option value="">All practice areas</option></select>
+      </div>
+      <div class="field">
+        <label for="f-bx-band">Value band</label>
+        <select id="f-bx-band"><option value="">All value bands</option></select>
+      </div>
+      <div class="field">
+        <label for="f-bx-status">Status</label>
+        <select id="f-bx-status"><option value="">All statuses</option></select>
+      </div>
+      <div class="field grow">
+        <label for="f-bx-q">Search</label>
+        <input type="search" id="f-bx-q" placeholder="Brief title or company">
+      </div>
+      <button type="button" class="reset-link" id="f-bx-reset" hidden>Reset filters</button>
+    </div>
+
+    <div class="table-wrap">
+      <table class="data-table" id="tbl-briefs">
+        <caption class="sr-only">Briefs posted to the exchange. Select a row to open the brief.</caption>
+        <thead>
+          <tr>
+            <th scope="col" data-key="title" class="col-wide"><button type="button">Brief</button></th>
+            <th scope="col" data-key="company"><button type="button">Company</button></th>
+            <th scope="col" data-key="practice"><button type="button">Practice</button></th>
+            <th scope="col" data-key="band"><button type="button">Value band</button></th>
+            <th scope="col" data-key="responses" class="col-num"><button type="button">Responses</button></th>
+            <th scope="col" data-key="closes"><button type="button">Closes</button></th>
+            <th scope="col" data-key="status"><button type="button">Status</button></th>
+            <th scope="col" data-key="score" class="col-num"><button type="button">Match</button></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p class="empty-state" hidden>No briefs match those filters. <button type="button" class="linkish">Reset filters</button></p>
+    </div>
+  </section>
+
+  <!-- ============================================================ POST A BRIEF -->
+  <section id="panel-post" class="panel" role="tabpanel" aria-labelledby="tab-post" tabindex="-1" hidden>
+    <div class="panel-head">
+      <h1>Post a brief</h1>
+      <p class="lede">Signed in as <strong id="gc-name">&mdash;</strong>. Posting a brief puts it in front of every firm whose credentials clear your matter type &mdash; not just the three you would have emailed.</p>
+    </div>
+
+    <div class="two-col">
+      <form class="card form-card" id="brief-form" novalidate>
+        <h2>New brief</h2>
+
+        <div class="field block">
+          <label for="nb-title">Brief title</label>
+          <input type="text" id="nb-title" name="title" required placeholder="e.g. Panel refresh — property and construction">
+          <p class="field-error" id="err-nb-title" hidden>Give the brief a title.</p>
+        </div>
+
+        <div class="field-row">
+          <div class="field block">
+            <label for="nb-type">Matter type</label>
+            <select id="nb-type" name="matterType" required></select>
+          </div>
+          <div class="field block">
+            <label for="nb-band">Value band</label>
+            <select id="nb-band" name="band" required></select>
+          </div>
+          <div class="field block">
+            <label for="nb-juris">Jurisdiction</label>
+            <select id="nb-juris" name="jurisdiction" required></select>
+          </div>
+        </div>
+
+        <div class="field block">
+          <label for="nb-desc">Scope description</label>
+          <textarea id="nb-desc" name="description" rows="5" required placeholder="What the work is, the timetable, and anything a responding firm must be able to show."></textarea>
+          <p class="field-error" id="err-nb-desc" hidden>Add a short scope description so firms can respond usefully.</p>
+        </div>
+
+        <div class="switch-row">
+          <label class="switch">
+            <input type="checkbox" id="nb-panel">
+            <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
+            <span class="switch-text">Panel firms only</span>
+          </label>
+          <p class="hint" id="nb-panel-hint">Off: any firm on the exchange whose credentials match may respond.</p>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Post brief</button>
+          <button type="reset" class="btn btn-ghost">Clear</button>
+        </div>
+      </form>
+
+      <aside class="card side-card">
+        <h2>What happens next</h2>
+        <ol class="steps">
+          <li><span>1</span> Your brief is matched against every participating firm&rsquo;s structured credentials library.</li>
+          <li><span>2</span> Firms above the relevance threshold see it on their brief board with a match score.</li>
+          <li><span>3</span> They respond through the same pursuits engine they use for tenders, so the response arrives already structured &mdash; scope, team, fee basis, cited matters.</li>
+          <li><span>4</span> You compare on the same axes instead of four differently-shaped PDFs.</li>
+        </ol>
+        <p class="footnote">Median time to first response on briefs in this value band: <strong>2.4 days</strong>.</p>
+      </aside>
+    </div>
+
+    <h2 class="section-title">My briefs</h2>
+    <div class="table-wrap">
+      <table class="data-table" id="tbl-mybriefs">
+        <caption class="sr-only">Briefs posted by your organisation.</caption>
+        <thead>
+          <tr>
+            <th scope="col" data-key="posted"><button type="button">Posted</button></th>
+            <th scope="col" data-key="title" class="col-wide"><button type="button">Brief</button></th>
+            <th scope="col" data-key="matterType"><button type="button">Matter type</button></th>
+            <th scope="col" data-key="band"><button type="button">Value band</button></th>
+            <th scope="col" data-key="jurisdiction"><button type="button">Jurisdiction</button></th>
+            <th scope="col" data-key="responses" class="col-num"><button type="button">Responses</button></th>
+            <th scope="col" data-key="status"><button type="button">Status</button></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================================================ RESPONSES -->
+  <section id="panel-responses" class="panel" role="tabpanel" aria-labelledby="tab-responses" tabindex="-1" hidden>
+    <div class="panel-head">
+      <h1>Responses</h1>
+      <p class="lede">Four firms responded through the pursuits engine, so every response carries the same fields. Ranked by match score against the brief.</p>
+    </div>
+
+    <div class="card brief-header" id="response-brief"></div>
+
+    <h2 class="section-title">Firm responses</h2>
+    <div class="response-list" id="response-list"></div>
+
+    <h2 class="section-title">Side-by-side comparison</h2>
+    <div class="table-wrap">
+      <table class="data-table" id="tbl-compare">
+        <caption class="sr-only">Comparison of the four responses.</caption>
+        <thead>
+          <tr>
+            <th scope="col" data-key="firm"><button type="button">Firm</button></th>
+            <th scope="col" data-key="score" class="col-num"><button type="button">Match score</button></th>
+            <th scope="col" data-key="fee" class="col-num"><button type="button">Fee estimate</button></th>
+            <th scope="col" data-key="feeBasis" class="col-wide"><button type="button">Fee basis</button></th>
+            <th scope="col" data-key="seniority" class="col-wide"><button type="button">Team seniority</button></th>
+            <th scope="col" data-key="matters" class="col-num"><button type="button">Relevant matters</button></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================================================ ABOUT -->
+  <section id="panel-about" class="panel" role="tabpanel" aria-labelledby="tab-about" tabindex="-1" hidden>
+    <div class="panel-head">
+      <h1>About this play</h1>
+      <p class="lede">Market-making. The wedge is a tool firms buy; the business is the market it creates.</p>
+    </div>
+
+    <div class="prose card">
+      <h2>The first-order wedge: three tools that are really one funnel</h2>
+      <p>A law firm&rsquo;s business development function does three separate things badly with three separate vendors. It <strong>finds</strong> opportunities by having someone read announcements, court lists and tender portals. It <strong>wins</strong> them by assembling tender responses from whatever precedents people can remember. And it <strong>stays visible</strong> between opportunities by publishing thought leadership on whatever a partner felt like writing about. Built separately, those are three point products in three crowded categories. Built together they are one funnel running on one data spine &mdash; the firm&rsquo;s structured credentials, plus a live feed of external demand signals. The origination agent surfaces the signal, the pursuits engine drafts the response citing the credentials that actually match, and the marketing engine turns the same signal into the follow-up article. Each module makes the other two sharper: credentials improve targeting, signals improve content topics, and won work feeds new credentials back in.</p>
+
+      <h2>What the wedge quietly accrues</h2>
+      <p>Selling that OS is a decent software business. What makes it a platform is the exhaust. From the pursuits engine you accumulate every participating firm&rsquo;s credentials in structured form, and every brief that passes through &mdash; that is supply-side liquidity nobody else has. From the origination agent you build a commercial signal graph of Australian corporate activity that is licensable well beyond law: accountants, consultants and recruiters want the same feed. From the marketing engine you build an owned audience of in-house counsel readers. Three years in you know, simultaneously, which firms can credibly do what and which companies are about to need what. Directories update annually. Panels update every three years. This updates every morning.</p>
+
+      <h2>The two parties it connects</h2>
+      <p>On one side, buyers of legal services: general counsel, corporate legal operations teams, government agencies running panel refreshes. On the other, sellers: firms that already run their BD on the platform and already respond to tenders through its pursuits engine. Today those two find each other through relationships, static panel arrangements and directory rankings &mdash; a matching mechanism with a resolution of about one year. This demo shows the flip: the Firm view is the wedge as it exists on day one, and the Client view is the market it becomes. The pursuits engine is the supply-side onramp, the signal graph is the demand-side radar, and the in-house readership acquired by the marketing module is how you get the demand side to show up at all.</p>
+
+      <h2>Endgame and what would kill it</h2>
+      <p>Revenue starts as per-seat SaaS for the OS and ends as a take rate or subscription on the exchange &mdash; the same shape as recruiter tooling that turned into a talent marketplace. The wedge is validated the first time a BD manager takes one real signal through origination to a drafted pursuit within a week of onboarding. The exchange is validated by one sentence from one general counsel: that they would post a mid-size brief to a platform instead of emailing three panel firms. That answer is the entire bet, and it is cheap to get early, so get it early. If GCs will not post, this is a well-built BD tool and nothing more.</p>
+    </div>
+
+    <div class="card play-map">
+      <h2>How the three tools roll up</h2>
+      <ul class="roll-up">
+        <li><span class="roll-tag">Find</span><span class="roll-body"><strong>Origination agent</strong> &mdash; ASX, courts, planning portals, tenders. Demand discovery. <em>Signals tab.</em></span></li>
+        <li><span class="roll-tag">Win</span><span class="roll-body"><strong>Pursuits engine</strong> &mdash; tender and proposal drafting off the credentials library. Conversion. <em>Pipeline tab, and every &ldquo;Draft pursuit&rdquo; button.</em></span></li>
+        <li><span class="roll-tag">Stay visible</span><span class="roll-body"><strong>Marketing engine</strong> &mdash; thought leadership generated from the same signals. Demand nurture. <em>Every &ldquo;Draft follow-up article&rdquo; button.</em></span></li>
+        <li><span class="roll-tag second">Second order</span><span class="roll-body"><strong>The exchange</strong> &mdash; in-house teams post briefs, on-platform firms respond through the engine they already use. <em>Exchange tab and the whole Client view.</em></span></li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<footer class="app-footer">
+  <div class="container footer-inner">
+    <p>Demo &mdash; all data is fictitious. Part of the second-order plays series.</p>
+    <a href="../index.html">&larr; All demos</a>
+  </div>
+</footer>
+
+<!-- slide-over detail panel -->
+<div class="overlay" id="overlay" hidden></div>
+<aside class="slideover" id="slideover" role="dialog" aria-modal="true" aria-labelledby="slideover-title" hidden>
+  <div class="slideover-head">
+    <div>
+      <p class="slideover-eyebrow" id="slideover-eyebrow"></p>
+      <h2 id="slideover-title"></h2>
+    </div>
+    <button type="button" class="icon-btn close-btn" id="slideover-close" aria-label="Close detail panel">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="slideover-body" id="slideover-body"></div>
+</aside>
+
+<div class="tooltip" id="tooltip" aria-hidden="true" hidden></div>
+<div class="toast-stack" id="toast-stack" role="status" aria-live="polite"></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

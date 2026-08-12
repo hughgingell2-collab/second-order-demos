@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CounselMatch — roles meet the recruiters who actually deliver</title>
+<meta name="description" content="Product demo: a marketplace where law firms post roles and vetted boutique recruiters compete. All data is fictitious.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<header class="site-header">
+  <div class="wrap header-top">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">◈</span>
+      <span class="brand-name">CounselMatch</span>
+      <span class="brand-tag">Roles meet the recruiters who actually deliver.</span>
+    </div>
+    <div class="header-tools">
+      <div class="segmented" role="group" aria-label="Perspective">
+        <button type="button" class="seg-btn" data-perspective="firm" aria-pressed="true">Firm view</button>
+        <button type="button" class="seg-btn" data-perspective="recruiter" aria-pressed="false">Recruiter view</button>
+      </div>
+      <button type="button" id="theme-toggle" class="btn btn-ghost theme-btn" aria-pressed="false">
+        <span class="theme-glyph" aria-hidden="true">☾</span><span id="theme-label">Dark</span>
+      </button>
+    </div>
+  </div>
+  <div class="wrap header-bottom">
+    <div class="tabs" role="tablist" aria-label="Screens" id="tablist"></div>
+    <p class="whoami" id="whoami"></p>
+  </div>
+</header>
+
+<main id="main" class="wrap">
+
+  <!-- ============================ FIRM: MY ROLES ============================ -->
+  <section class="panel" id="panel-firm-roles" role="tabpanel" aria-labelledby="tab-firm-roles" tabindex="-1" hidden>
+    <div class="panel-head">
+      <h1>My roles</h1>
+      <p class="lede">Every mandate <span id="roles-firm-name">the firm</span> currently has on CounselMatch, with the recruiters engaged on each and where the candidates actually sit. Click a role for its pipeline and its recruiter ranking.</p>
+    </div>
+
+    <div class="stat-row" id="roles-stats"></div>
+
+    <div class="filter-bar" role="group" aria-label="Filter roles">
+      <label class="field">
+        <span class="field-label">Practice area</span>
+        <select id="roles-practice"></select>
+      </label>
+      <label class="field">
+        <span class="field-label">Status</span>
+        <select id="roles-status"></select>
+      </label>
+      <button type="button" class="reset-link" id="roles-reset" hidden>Reset filters</button>
+      <p class="result-count" id="roles-count" aria-live="polite"></p>
+    </div>
+
+    <div class="card table-card">
+      <div class="table-scroll" id="roles-table"></div>
+    </div>
+  </section>
+
+  <!-- ========================= FIRM: RECRUITER MARKET ======================= -->
+  <section class="panel" id="panel-firm-market" role="tabpanel" aria-labelledby="tab-firm-market" tabindex="-1" hidden>
+    <div class="panel-head">
+      <h1>Recruiter market</h1>
+      <p class="lede">Eighteen boutique recruiters, ranked by what they have actually delivered rather than by who called you last. Hit-rate is placements divided by briefs taken over the last twelve months, measured across every firm on the platform — the number no single firm can see on its own.</p>
+    </div>
+
+    <div class="filter-bar" role="group" aria-label="Filter recruiters">
+      <label class="field">
+        <span class="field-label">Niche</span>
+        <select id="market-niche"></select>
+      </label>
+      <label class="field">
+        <span class="field-label">Minimum hit-rate</span>
+        <select id="market-hitrate">
+          <option value="0">Any</option>
+          <option value="50">50% or better</option>
+          <option value="60">60% or better</option>
+          <option value="65">65% or better</option>
+          <option value="70">70% or better</option>
+        </select>
+      </label>
+      <label class="field field-search">
+        <span class="field-label">Search</span>
+        <input type="search" id="market-search" placeholder="Name, boutique or niche" autocomplete="off">
+      </label>
+      <button type="button" class="reset-link" id="market-reset" hidden>Reset filters</button>
+      <p class="result-count" id="market-count" aria-live="polite"></p>
+    </div>
+
+    <div class="card chart-card">
+      <div class="chart-head">
+        <h2 class="chart-title">Performance separates the market</h2>
+        <p class="chart-sub">Hit-rate against median days to fill. Each dot is one recruiter; dot size is placements in the last twelve months. The shaded quadrant is faster <em>and</em> more reliable than the market median.</p>
+      </div>
+      <div class="chart-holder" id="market-scatter"></div>
+      <div class="chart-foot">
+        <div class="size-legend" id="market-size-legend"></div>
+        <p class="chart-note">Axes and both median lines are fixed to the whole market of 18 recruiters, so filtering never moves the goalposts. The table below is the same data, sortable and searchable.</p>
+      </div>
+    </div>
+
+    <div class="card table-card">
+      <div class="table-scroll" id="market-table"></div>
+    </div>
+  </section>
+
+  <!-- ============================ FIRM: POST A ROLE ========================= -->
+  <section class="panel" id="panel-firm-post" role="tabpanel" aria-labelledby="tab-firm-post" tabindex="-1" hidden>
+    <div class="panel-head">
+      <h1>Post a role</h1>
+      <p class="lede">Describe the mandate. CounselMatch ranks the recruiter panel by niche fit and by delivered hit-rate, then you invite the ones you want. The role appears in My roles immediately.</p>
+    </div>
+
+    <div class="post-grid">
+      <div class="card form-card">
+        <form id="post-form" novalidate>
+          <div class="form-row">
+            <label class="field field-wide">
+              <span class="field-label">Role title</span>
+              <input type="text" id="post-title" placeholder="Senior Associate - Projects & Energy" autocomplete="off" aria-describedby="post-title-err">
+              <span class="field-error" id="post-title-err" hidden>Give the role a title so recruiters know what they are pitching for.</span>
+            </label>
+          </div>
+          <div class="form-row">
+            <label class="field">
+              <span class="field-label">Practice area</span>
+              <select id="post-practice"></select>
+            </label>
+            <label class="field">
+              <span class="field-label">PQE band</span>
+              <select id="post-pqe"></select>
+            </label>
+          </div>
+          <div class="form-row">
+            <label class="field">
+              <span class="field-label">Location</span>
+              <select id="post-location"></select>
+            </label>
+            <label class="field">
+              <span class="field-label">Salary band (AUD base)</span>
+              <select id="post-salary"></select>
+            </label>
+          </div>
+          <div class="form-row">
+            <label class="field field-wide">
+              <span class="field-label">Placement fee <span class="fee-out" id="post-fee-out">22%</span> of base</span>
+              <input type="range" id="post-fee" min="18" max="25" step="0.5" value="22"
+                     aria-describedby="post-fee-hint">
+              <span class="field-hint" id="post-fee-hint">Market range on CounselMatch is 18% to 25%. Higher fees attract more of the panel.</span>
+            </label>
+          </div>
+          <div class="form-row">
+            <div class="switch-row">
+              <label class="switch">
+                <input type="checkbox" id="post-exclusive">
+                <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
+                <span class="switch-text">Exclusive for 30 days</span>
+              </label>
+              <p class="field-hint">Exclusivity narrows the invite list to your top three matches and usually buys you a faster first shortlist.</p>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Find matched recruiters</button>
+            <button type="button" class="btn btn-ghost" id="post-reset">Clear</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card match-card" id="post-results" hidden>
+        <h2 class="card-title" id="post-results-title">Matched recruiters</h2>
+        <p class="card-sub" id="post-results-sub"></p>
+        <ul class="match-list" id="post-match-list"></ul>
+        <div class="match-foot" id="post-match-foot"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================= RECRUITER: BRIEF BOARD ======================= -->
+  <section class="panel" id="panel-rec-board" role="tabpanel" aria-labelledby="tab-rec-board" tabindex="-1" hidden>
+    <div class="panel-head">
+      <h1>Brief board</h1>
+      <p class="lede">Live mandates across every firm on CounselMatch. Firms stay anonymous until you claim the brief. You can hold three active claims at a time — release one to take another.</p>
+    </div>
+
+    <div class="claim-meter" id="claim-meter"></div>
+
+    <div class="filter-bar" role="group" aria-label="Filter briefs">
+      <label class="field">
+        <span class="field-label">Practice area</span>
+        <select id="board-practice"></select>
+      </label>
+      <label class="field">
+        <span class="field-label">PQE band</span>
+        <select id="board-pqe"></select>
+      </label>
+      <label class="field">
+        <span class="field-label">Fit to your niches</span>
+        <select id="board-fit">
+          <option value="all">All briefs</option>
+          <option value="fit">Your niches only</option>
+        </select>
+      </label>
+      <label class="field field-search">
+        <span class="field-label">Search</span>
+        <input type="search" id="board-search" placeholder="Firm, practice or location" autocomplete="off">
+      </label>
+      <button type="button" class="reset-link" id="board-reset" hidden>Reset filters</button>
+      <p class="result-count" id="board-count" aria-live="polite"></p>
+    </div>
+
+    <div class="card table-card">
+      <div class="table-scroll" id="board-table"></div>
+    </div>
+  </section>
+
+  <!-- ========================== RECRUITER: MY BRIEFS ======================== -->
+  <section class="panel" id="panel-rec-briefs" role="tabpanel" aria-labelledby="tab-rec-briefs" tabindex="-1" hidden>
+    <div class="panel-head">
+      <h1>My briefs</h1>
+      <p class="lede">The briefs you have claimed. The firm is revealed, the clock is running, and every candidate you submit is recorded against your hit-rate in this niche.</p>
+    </div>
+    <div id="my-briefs-list"></div>
+  </section>
+
+  <!-- ======================= RECRUITER: MY PERFORMANCE ====================== -->
+  <section class="panel" id="panel-rec-perf" role="tabpanel" aria-labelledby="tab-rec-perf" tabindex="-1" hidden>
+    <div class="panel-head">
+      <h1>My performance</h1>
+      <p class="lede">Your side of the trust graph. These are the same numbers firms see when they rank the panel — which is why the record, not the relationship, is what wins the next brief.</p>
+    </div>
+
+    <div class="stat-row" id="perf-stats"></div>
+
+    <div class="chart-grid">
+      <div class="card chart-card">
+        <div class="chart-head">
+          <h2 class="chart-title">Hit-rate by niche</h2>
+          <p class="chart-sub">Placements as a share of briefs taken, last twelve months. Your overall rate is the weighted blend of these three.</p>
+        </div>
+        <div class="chart-holder" id="perf-bar"></div>
+        <div class="chart-foot">
+          <p class="chart-note" id="perf-bar-note"></p>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="chart-head">
+          <h2 class="chart-title">Placements by month</h2>
+          <p class="chart-sub">Twelve months to August 2026. Hover or use the arrow keys to read a month.</p>
+        </div>
+        <div class="chart-holder" id="perf-line"></div>
+        <div class="chart-foot">
+          <p class="chart-note" id="perf-line-note"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">Where you rank, niche by niche</h2>
+      <p class="card-sub">Ranking is against every recruiter on CounselMatch who has taken a brief in that niche in the last twelve months.</p>
+      <div class="rank-grid" id="perf-ranks"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">Your monthly record</h2>
+      <p class="card-sub">The table behind both charts above.</p>
+      <div class="table-scroll" id="perf-table"></div>
+    </div>
+  </section>
+
+  <!-- ============================ ABOUT THIS PLAY =========================== -->
+  <section class="panel" id="panel-about" role="tabpanel" aria-labelledby="tab-about" tabindex="-1" hidden>
+    <div class="panel-head">
+      <h1>About this play</h1>
+      <p class="lede">Why a recruiter marketplace is the second-order idea, and not the AI screening tool everyone builds first.</p>
+    </div>
+
+    <div class="prose card">
+      <h2>The wedge</h2>
+      <p>The obvious first-order product in legal hiring is an AI recruiter: a tool that reads CVs, screens candidates and writes the shortlist. CounselMatch skips that and builds the layer underneath it — a marketplace where firms post a role and vetted independent recruiters compete to fill it. Legal is the right beachhead because the fees are large enough that a thin take-rate still pays (20% to 25% of base salary), because credentials are legible enough to vet at scale (admission, practice area, post-qualification experience), and because the buyer network is small and dense: Australian legal hiring runs through a few hundred firms and a few dozen boutique recruiters who all already know each other.</p>
+
+      <h2>What it accrues</h2>
+      <p>Running that marketplace produces a record that neither side can assemble alone: which recruiters actually deliver, in which niches, and how fast — and, pointing the other way, which firms actually hire versus which ones fish the market for market intelligence and never sign anyone. Today a firm's view of a recruiter is one relationship and a few anecdotes. A recruiter's view of a firm is the same. The platform sees every brief, every submission and every placement, so it can say that a recruiter converts 75% of projects and energy briefs at a median of 31 days, and that the number is measured across eleven firms rather than one. That performance history is the moat: a new entrant with the same software starts with zero signal, and signal is the whole product.</p>
+
+      <h2>The two parties</h2>
+      <p>On one side, hiring firms and in-house legal teams who want the brief filled and cannot tell a good recruiter from a busy one. On the other, independent and boutique recruiters whose track record is currently trapped inside their own CRM and worth nothing when they walk into a new firm. CounselMatch connects them by making that track record portable and public. The unique knowledge cuts both ways: recruiter hit-rates by niche on one side, firm-side responsiveness and the real (rather than advertised) requirements on the other — which is why the brief board in this demo shows what the panel actually screens for, not what the job advert says.</p>
+
+      <h2>Endgame</h2>
+      <p>The business model is a take-rate on placements, charged to the employer and shared with the recruiter, in the Paraform pattern. The expansion is a third-order move: the same trust graph works for any professional-services employer and any specialist recruiter, so lawyers are the beachhead for accountants, consultants, in-house counsel, business development professionals and paralegals — the entire non-technical talent market, which has no equivalent of the technical-recruiting marketplaces. It also shares a spine with a legal business-development exchange: one matches legal <em>work</em> to firms, this matches legal <em>people</em> to firms, over the same buyers and the same trust mechanics.</p>
+
+      <div class="callout">
+        <h3>What would validate it</h3>
+        <p>Two boutique legal recruiters agreeing to take briefs through a platform, and one firm talent lead agreeing to post a real role. Marketplace validation is pairwise — one side alone proves nothing.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <p>Demo — all data is fictitious. Part of the second-order plays series.</p>
+    <a href="../index.html">← All demos</a>
+  </div>
+</footer>
+
+<div class="toast-wrap" id="toasts" aria-live="polite"></div>
+<div class="chart-tip" id="chart-tip" role="presentation" hidden></div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="slideover" id="slideover" role="dialog" aria-modal="true" aria-labelledby="slideover-title">
+    <div class="slideover-head">
+      <div>
+        <p class="slideover-kicker" id="slideover-kicker"></p>
+        <h2 id="slideover-title"></h2>
+      </div>
+      <button type="button" class="btn btn-ghost close-btn" id="slideover-close">Close</button>
+    </div>
+    <div class="slideover-body" id="slideover-body"></div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

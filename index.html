@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Second-Order Plays — Demo Series</title>
+<style>
+  :root {
+    --bg: #fafafa; --surface: #ffffff; --text: #1a1a2e; --muted: #6b7280; --border: #e5e7eb;
+    --c1: #4f46e5; --c2: #dc2626; --c3: #2563eb; --c6: #0d9488; --c7: #7c3aed; --c8: #d97706;
+  }
+  [data-theme="dark"] {
+    --bg: #111318; --surface: #1b1e26; --text: #e8eaf0; --muted: #9aa1ad; --border: #2a2f3a;
+    --c1: #818cf8; --c2: #f87171; --c3: #60a5fa; --c6: #2dd4bf; --c7: #a78bfa; --c8: #fbbf24;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.5; font-size: 16px;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 24px 16px 48px; }
+  header.top { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 8px 0 32px; }
+  header.top h1 { font-size: 1.35rem; letter-spacing: -0.01em; }
+  #themeToggle {
+    background: var(--surface); color: var(--text); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 12px; cursor: pointer; font: inherit; font-size: 0.85rem;
+  }
+  #themeToggle:focus-visible { outline: 2px solid var(--c3); outline-offset: 2px; }
+  .hero { max-width: 760px; margin-bottom: 40px; }
+  .hero p { color: var(--muted); margin-top: 12px; }
+  .hero .thesis { color: var(--text); font-size: 1.15rem; font-weight: 500; margin-top: 16px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+  .card {
+    display: block; background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 24px; text-decoration: none; color: inherit; border-top: 3px solid var(--accent);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+  .card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .card .num { font-size: 0.75rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; }
+  .card h2 { font-size: 1.15rem; margin: 6px 0 2px; }
+  .card .tag { font-style: italic; color: var(--muted); font-size: 0.9rem; margin-bottom: 10px; }
+  .card p { color: var(--muted); font-size: 0.9rem; }
+  .card .lens { display: inline-block; margin-top: 14px; font-size: 0.75rem; border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px; color: var(--muted); }
+  footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem; }
+  @media (prefers-reduced-motion: reduce) { .card { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Second-Order Plays — demo series</h1>
+    <button id="themeToggle" aria-label="Toggle colour theme">Theme</button>
+  </header>
+
+  <section class="hero">
+    <p class="thesis">First-order ideas are "an AI tool that does X's job." The second-order question: when the tool works, what does it know that nobody else knows — and which two parties could that knowledge connect?</p>
+    <p>Six interactive product mockups of the endgame each first-order wedge is designed toward. All data is fictitious. Built August 2026.</p>
+  </section>
+
+  <nav class="grid" aria-label="Demo sites">
+    <a class="card" href="statutegraph/index.html" style="--accent: var(--c1)">
+      <span class="num">Play 01</span>
+      <h2>StatuteGraph</h2>
+      <p class="tag">The legislation → document impact graph</p>
+      <p>The precedent updater's real asset is its map of which provisions touch which clauses. Sold as a feed, it's Bloomberg for statutory change.</p>
+      <span class="lens">Data layer · wedge: precedent updater</span>
+    </a>
+    <a class="card" href="clientdrill/index.html" style="--accent: var(--c2)">
+      <span class="num">Play 02</span>
+      <h2>ClientDrill</h2>
+      <p class="tag">Your clients drill. You get the call.</p>
+      <p>White-label crisis drills that firms give their clients as BD. Every drill reveals which clients worry about which risks.</p>
+      <span class="lens">Marketing for X · wedge: training simulator</span>
+    </a>
+    <a class="card" href="briefexchange/index.html" style="--accent: var(--c3)">
+      <span class="num">Plays 03–05</span>
+      <h2>BriefExchange</h2>
+      <p class="tag">One funnel. Then the market.</p>
+      <p>Origination, pursuits and marketing as one Legal BD OS — whose brief and signal exhaust becomes a legal work exchange.</p>
+      <span class="lens">Market-making · wedge: BD origination + pursuits + marketing</span>
+    </a>
+    <a class="card" href="panelflow/index.html" style="--accent: var(--c6)">
+      <span class="num">Play 06</span>
+      <h2>PanelFlow</h2>
+      <p class="tag">Reporting is the excuse. Allocation is the market.</p>
+      <p>Government panel dashboards install the allocation engine — a captive marketplace between agencies and panel firms.</p>
+      <span class="lens">Market-making · wedge: gov panel management</span>
+    </a>
+    <a class="card" href="counselmatch/index.html" style="--accent: var(--c7)">
+      <span class="num">Play 07</span>
+      <h2>CounselMatch</h2>
+      <p class="tag">Roles meet the recruiters who actually deliver.</p>
+      <p>Paraform for lawyers: firms post roles, vetted recruiters compete, and the hit-rate trust graph becomes the moat.</p>
+      <span class="lens">Market-making · wedge: legal recruitment marketplace</span>
+    </a>
+    <a class="card" href="tradeflow/index.html" style="--accent: var(--c8)">
+      <span class="num">Play 08</span>
+      <h2>TradeFlow</h2>
+      <p class="tag">Every triaged request is a job. Every job is the market.</p>
+      <p>PM maintenance triage originates scoped, pre-approved jobs — routed to a tradie network that pays for flow, not leads.</p>
+      <span class="lens">Market-making · wedge: property managers AI</span>
+    </a>
+  </nav>
+
+  <footer>
+    Demo series — all data is fictitious. Source strategy docs live in the private idea-prompts repo.
+  </footer>
+</div>
+<script>
+  (function () {
+    var root = document.documentElement;
+    var stored = null;
+    try { stored = localStorage.getItem("so-theme"); } catch (e) {}
+    var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var theme = stored || (prefersDark ? "dark" : "light");
+    apply(theme);
+    document.getElementById("themeToggle").addEventListener("click", function () {
+      theme = theme === "dark" ? "light" : "dark";
+      apply(theme);
+      try { localStorage.setItem("so-theme", theme); } catch (e) {}
+    });
+    function apply(t) {
+      if (t === "dark") { root.setAttribute("data-theme", "dark"); }
+      else { root.removeAttribute("data-theme"); }
+    }
+  })();
+</script>
+</body>
+</html>

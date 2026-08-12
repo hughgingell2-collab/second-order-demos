@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PanelFlow — government legal panel allocation</title>
+<meta name="description" content="Demo: government legal panel dashboards as the trojan horse for an allocation marketplace. All data fictitious.">
+<link rel="stylesheet" href="styles.css">
+<script>
+  /* Set the theme before first paint so there is no flash. The stylesheet also
+     honours prefers-color-scheme on its own, so this is progressive only. */
+  try {
+    var t = localStorage.getItem('panelflow-theme');
+    if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+  } catch (e) { /* storage blocked — fall back to the CSS media query */ }
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="app-header">
+  <div class="wrap header-top">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="wordmark">PanelFlow</span>
+      <span class="tagline">Reporting is the excuse. Allocation is the market.</span>
+    </div>
+    <div class="header-controls">
+      <div class="segmented" role="radiogroup" aria-label="Perspective" id="perspective">
+        <button type="button" role="radio" aria-checked="true" data-view="agency" id="persp-agency">Agency view</button>
+        <button type="button" role="radio" aria-checked="false" data-view="firm" id="persp-firm">Firm view</button>
+      </div>
+      <button type="button" class="icon-btn" id="theme-toggle" aria-pressed="false">
+        <span id="theme-icon" aria-hidden="true">◐</span>
+        <span id="theme-label">Dark</span>
+      </button>
+    </div>
+  </div>
+  <nav class="tabbar" aria-label="Screens">
+    <div class="wrap" role="tablist" id="tabbar"></div>
+  </nav>
+  <div class="context-strip">
+    <div class="wrap" id="context-strip"></div>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+
+  <!-- ============ AGENCY · SPEND DASHBOARD ============ -->
+  <section class="panel" id="panel-spend" role="tabpanel" aria-labelledby="tab-spend" tabindex="0" hidden>
+    <div class="wrap">
+      <div class="screen-head">
+        <h2>Panel spend dashboard</h2>
+        <p>Where the panel budget went, which firms carried it, and how long allocation took. This is the reporting obligation the platform is bought for.</p>
+      </div>
+
+      <div class="filters" role="group" aria-label="Dashboard filters">
+        <div class="field">
+          <label for="f-fy">Financial year</label>
+          <select id="f-fy"></select>
+        </div>
+        <div class="field">
+          <label for="f-type">Matter type</label>
+          <select id="f-type"></select>
+        </div>
+        <button type="button" class="reset-link" id="f-reset" hidden>Reset filters</button>
+      </div>
+
+      <div class="kpi-grid" id="kpi-grid"></div>
+
+      <div class="chart-grid">
+        <div class="card">
+          <div class="card-head"><h3 class="card-title" id="t-firms">Spend by panel firm</h3></div>
+          <p class="card-sub" id="s-firms"></p>
+          <div class="chart-host" id="chart-firms"></div>
+          <details class="data-table"><summary>Data table</summary><div class="table-scroll" id="dt-firms"></div></details>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3 class="card-title" id="t-types">Spend by matter type</h3></div>
+          <p class="card-sub" id="s-types"></p>
+          <div class="donut-layout">
+            <div class="chart-host" id="chart-types"></div>
+            <ul class="donut-key" id="key-types"></ul>
+          </div>
+          <details class="data-table"><summary>Data table</summary><div class="table-scroll" id="dt-types"></div></details>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3 class="card-title" id="t-trend">Monthly spend trend</h3></div>
+        <p class="card-sub" id="s-trend"></p>
+        <div class="chart-host" id="chart-trend"></div>
+        <details class="data-table"><summary>Data table</summary><div class="table-scroll" id="dt-trend"></div></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ AGENCY · ALLOCATE A MATTER ============ -->
+  <section class="panel" id="panel-allocate" role="tabpanel" aria-labelledby="tab-allocate" tabindex="0" hidden>
+    <div class="wrap">
+      <div class="screen-head">
+        <h2>Allocate a matter</h2>
+        <p>The moment the dashboard becomes a marketplace. Describe the matter, and the engine ranks the panel on past performance, current capacity, rate against benchmark, and conflict status. It recommends; you decide.</p>
+        <p>Expect the ranking to disagree with your spend history. The FY26 allocations on the dashboard were made from memory and a spreadsheet, before any of this evidence existed — the firms carrying the most work are now the most stretched, and the firms rated highest are not the ones being called. That gap is the product.</p>
+      </div>
+
+      <form class="card" id="allocate-form" novalidate>
+        <div class="form-grid">
+          <div class="field">
+            <label for="a-title">Matter name</label>
+            <input type="text" id="a-title" placeholder="e.g. Rezoning advice — Penrith corridor" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="a-type">Matter type</label>
+            <select id="a-type" required></select>
+          </div>
+          <div class="field">
+            <label for="a-complexity">Complexity</label>
+            <select id="a-complexity"></select>
+          </div>
+          <div class="field">
+            <label for="a-band">Estimated value band</label>
+            <select id="a-band"></select>
+          </div>
+          <div class="field">
+            <label for="a-required">Required by</label>
+            <input type="date" id="a-required" min="2026-08-14" max="2027-06-30" value="2026-10-16">
+          </div>
+        </div>
+
+        <fieldset style="margin-top:16px">
+          <legend>Conflict check — exclude firms</legend>
+          <div class="chip-set" id="a-exclusions"></div>
+        </fieldset>
+
+        <div class="form-actions">
+          <button type="submit" class="btn" id="a-submit">Get recommendations</button>
+          <button type="button" class="btn secondary" id="a-clear">Clear</button>
+          <span class="muted" style="font-size:0.8125rem" id="a-hint"></span>
+        </div>
+      </form>
+
+      <div id="rec-region" aria-live="polite"></div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3 class="card-title">Recent allocations</h3>
+          <span class="muted" style="font-size:0.8125rem">FY27 to date</span>
+        </div>
+        <p class="card-sub">Every allocation made through PanelFlow, with the score the engine gave the chosen firm. Select a row for the full record.</p>
+        <div class="table-toolbar">
+          <div class="field">
+            <label for="r-type">Matter type</label>
+            <select id="r-type"></select>
+          </div>
+          <div class="field">
+            <label for="r-firm">Firm</label>
+            <select id="r-firm"></select>
+          </div>
+          <button type="button" class="reset-link" id="r-reset" hidden>Reset filters</button>
+          <span class="result-count" id="r-count"></span>
+        </div>
+        <div class="table-scroll"><table id="recent-table"></table></div>
+        <div id="recent-empty"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ AGENCY · BENCHMARKS ============ -->
+  <section class="panel" id="panel-benchmarks" role="tabpanel" aria-labelledby="tab-benchmarks" tabindex="0" hidden>
+    <div class="wrap">
+      <div class="screen-head">
+        <h2>Cross-agency rate benchmarks</h2>
+        <p>What your panel charges, next to what the same seniority costs everywhere else. This is the knowledge the allocation flow creates and nobody else holds.</p>
+      </div>
+
+      <div class="callout" id="bench-callout"></div>
+
+      <div class="card">
+        <div class="card-head"><h3 class="card-title" id="t-bench">Your blended rate vs cross-agency median</h3></div>
+        <p class="card-sub" id="s-bench"></p>
+        <div class="chart-host" id="chart-bench"></div>
+        <div class="chart-legend" id="legend-bench"></div>
+        <details class="data-table"><summary>Data table</summary><div class="table-scroll" id="dt-bench"></div></details>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3 class="card-title">Rate benchmarks by matter type and seniority</h3></div>
+        <p class="card-sub">Positive delta means this agency pays above the cross-agency median. Select a row for the detail.</p>
+        <div class="table-toolbar">
+          <div class="field">
+            <label for="b-type">Matter type</label>
+            <select id="b-type"></select>
+          </div>
+          <div class="field">
+            <label for="b-sen">Seniority</label>
+            <select id="b-sen"></select>
+          </div>
+          <div class="field grow">
+            <label for="b-search">Search</label>
+            <input type="search" id="b-search" placeholder="Search matter type or seniority" autocomplete="off">
+          </div>
+          <button type="button" class="reset-link" id="b-reset" hidden>Reset filters</button>
+          <span class="result-count" id="b-count"></span>
+        </div>
+        <div class="table-scroll"><table id="bench-table"></table></div>
+        <div id="bench-empty"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FIRM · PERFORMANCE ============ -->
+  <section class="panel" id="panel-performance" role="tabpanel" aria-labelledby="tab-performance" tabindex="0" hidden>
+    <div class="wrap">
+      <div class="screen-head">
+        <h2>Why you win and lose</h2>
+        <p id="perf-intro"></p>
+      </div>
+
+      <div class="kpi-grid" id="firm-kpis"></div>
+
+      <div class="card">
+        <div class="card-head"><h3 class="card-title" id="t-winrate">Win rate by matter type</h3></div>
+        <p class="card-sub" id="s-winrate"></p>
+        <div class="chart-host" id="chart-winrate"></div>
+        <div class="chart-legend" id="legend-winrate"></div>
+        <details class="data-table"><summary>Data table</summary><div class="table-scroll" id="dt-winrate"></div></details>
+        <div class="insight" id="insight-winrate"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3 class="card-title" id="t-share">Allocation share trend</h3></div>
+        <p class="card-sub" id="s-share"></p>
+        <div class="chart-host" id="chart-share"></div>
+        <div class="chart-legend" id="legend-share"></div>
+        <details class="data-table"><summary>Data table</summary><div class="table-scroll" id="dt-share"></div></details>
+        <div class="insight" id="insight-share"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3 class="card-title">Responsiveness</h3></div>
+        <p class="card-sub">How quickly you answer an allocation request, against the panel average. Service is not your problem.</p>
+        <div class="table-scroll"><table id="resp-table"></table></div>
+        <div class="insight" id="insight-resp"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3 class="card-title">Where you lost — your rate vs the winning rate</h3></div>
+        <p class="card-sub">Every matter you were shortlisted for and did not win. Select a row to see the full field.</p>
+        <div class="table-toolbar">
+          <div class="field">
+            <label for="l-type">Matter type</label>
+            <select id="l-type"></select>
+          </div>
+          <div class="field">
+            <label for="l-fy">Financial year</label>
+            <select id="l-fy"></select>
+          </div>
+          <div class="field grow">
+            <label for="l-search">Search</label>
+            <input type="search" id="l-search" placeholder="Search matter name, type or firm" autocomplete="off">
+          </div>
+          <button type="button" class="reset-link" id="l-reset" hidden>Reset filters</button>
+          <span class="result-count" id="l-count"></span>
+        </div>
+        <div class="table-scroll"><table id="lost-table"></table></div>
+        <div id="lost-empty"></div>
+        <div class="insight" id="insight-lost"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ABOUT ============ -->
+  <section class="panel" id="panel-about" role="tabpanel" aria-labelledby="tab-about" tabindex="0" hidden>
+    <div class="wrap">
+      <div class="screen-head">
+        <h2>About this play</h2>
+        <p>The second-order idea this demo exists to show.</p>
+      </div>
+      <div class="card prose" id="about-prose"></div>
+      <div class="play-meta">
+        <div class="card">
+          <h3>Lens</h3>
+          <p>Market-making.</p>
+        </div>
+        <div class="card">
+          <h3>First-order wedge</h3>
+          <p>A government legal panel management platform — spend, allocation and performance dashboards for agencies.</p>
+        </div>
+        <div class="card">
+          <h3>What it accrues</h3>
+          <p>Matter-level flow data: what government sends out, to whom, at what rate, with what outcome — across agencies, not inside one.</p>
+        </div>
+        <div class="card">
+          <h3>The two parties</h3>
+          <p>Agencies (buyers with reporting obligations) and panel firms (sellers who fly blind on why they win or lose).</p>
+        </div>
+        <div class="card">
+          <h3>Endgame</h3>
+          <p>Agency-side SaaS first, firm-side analytics second, then the benchmarks reprice the panel market and re-tenders run through the platform.</p>
+        </div>
+        <div class="card">
+          <h3>What would validate it</h3>
+          <p>One agency legal operations lead confirming allocation is done today by memory and spreadsheet, and that they would trust a tool to recommend rather than decide. Start with a state agency or council, not the Commonwealth.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="app-footer">
+  <div class="wrap">
+    <span>Demo — all data is fictitious. Part of the second-order plays series.</span>
+    <a href="../index.html">&larr; All demos</a>
+  </div>
+</footer>
+
+<div class="viz-tip" id="viz-tip" role="presentation" aria-hidden="true"></div>
+<div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="false"></div>
+<div class="overlay" id="overlay" hidden></div>
+<aside class="slideover" id="slideover" role="dialog" aria-modal="true" aria-labelledby="slideover-title" hidden>
+  <div class="slideover-head">
+    <div>
+      <div class="muted" style="font-size:0.75rem" id="slideover-kicker"></div>
+      <h2 id="slideover-title" style="font-size:1.0625rem"></h2>
+    </div>
+    <button type="button" class="close-btn" id="slideover-close" aria-label="Close detail panel">&times;</button>
+  </div>
+  <div class="slideover-body" id="slideover-body"></div>
+</aside>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
