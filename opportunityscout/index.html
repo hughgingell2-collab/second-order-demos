@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpportunityScout — AI career &amp; startup opportunity radar</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <span class="wordmark">OpportunityScout<span class="live">Live data</span></span>
+    <nav class="tabs" aria-label="Sections">
+      <button data-tab="study" aria-selected="true">Study programs</button>
+      <button data-tab="scholarships" aria-selected="false">Scholarships</button>
+      <button data-tab="startups" aria-selected="false">Startup support</button>
+      <button data-tab="about" aria-selected="false">How it works</button>
+    </nav>
+    <button id="themeToggle" aria-label="Toggle colour theme">Theme</button>
+  </div>
+</header>
+
+<div class="wrap">
+<main>
+
+  <!-- ============ Study programs ============ -->
+  <section id="panel-study" role="tabpanel" aria-label="Study programs">
+    <div class="section-intro">
+      <h1>Masters &amp; graduate programs — AI and AI × law</h1>
+      <p>Programs at Stanford, Harvard, Penn/Wharton, MIT, Oxford and Cambridge relevant to a lawyer moving into AI. Deadlines are for the current cycle; the scraper watches each official page for changes.</p>
+      <p class="freshness"></p>
+    </div>
+    <div class="controls">
+      <select data-filter="university" aria-label="Filter by university"><option value="all">All universities</option></select>
+      <select data-filter="category" aria-label="Filter by category"><option value="all">All categories</option></select>
+      <input type="search" placeholder="Search programs…" aria-label="Search programs">
+      <button class="reset-link" hidden>Reset filters</button>
+      <span class="count"></span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col"><button data-key="program">Program<span class="arrow"></span></button></th>
+            <th scope="col"><button data-key="category">Category<span class="arrow"></span></button></th>
+            <th scope="col" class="num"><button data-key="deadline">Deadline<span class="arrow"></span></button></th>
+            <th scope="col" class="num"><button data-key="tuition">Tuition (approx.)<span class="arrow"></span></button></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="empty" hidden>No results — <button>reset filters</button></div>
+  </section>
+
+  <!-- ============ Scholarships ============ -->
+  <section id="panel-scholarships" role="tabpanel" aria-label="Scholarships" hidden>
+    <div class="section-intro">
+      <h1>Scholarships &amp; fellowships</h1>
+      <p>Funding an Australian lawyer can realistically pursue for a masters in AI, data science or tech policy at a top school — plus AI-specific fellowships that fund the career pivot directly.</p>
+      <p class="freshness"></p>
+    </div>
+    <div class="controls">
+      <input type="search" placeholder="Search scholarships…" aria-label="Search scholarships">
+      <button class="reset-link" hidden>Reset filters</button>
+      <span class="count"></span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col"><button data-key="name">Scholarship<span class="arrow"></span></button></th>
+            <th scope="col"><button data-key="funds">Funds study at<span class="arrow"></span></button></th>
+            <th scope="col" class="num"><button data-key="deadline">Deadline<span class="arrow"></span></button></th>
+            <th scope="col"><button data-key="value">Value<span class="arrow"></span></button></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="empty" hidden>No results — <button>reset filters</button></div>
+  </section>
+
+  <!-- ============ Startup support ============ -->
+  <section id="panel-startups" role="tabpanel" aria-label="Startup support" hidden>
+    <div class="section-intro">
+      <h1>Startup support — incubators, accelerators &amp; grants</h1>
+      <p>Programs for founding an AI or legal-tech startup: Australia and the USA in focus, plus a rest-of-world explorer. Filter by region.</p>
+      <p class="freshness"></p>
+    </div>
+    <div class="controls">
+      <select data-filter="region" aria-label="Filter by region"><option value="all">All regions</option></select>
+      <input type="search" placeholder="Search programs…" aria-label="Search startup programs">
+      <button class="reset-link" hidden>Reset filters</button>
+      <span class="count"></span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col"><button data-key="name">Program<span class="arrow"></span></button></th>
+            <th scope="col"><button data-key="region">Region<span class="arrow"></span></button></th>
+            <th scope="col"><button data-key="offer">Offer<span class="arrow"></span></button></th>
+            <th scope="col" class="num"><button data-key="deadline">Next deadline<span class="arrow"></span></button></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="empty" hidden>No results — <button>reset filters</button></div>
+  </section>
+
+  <!-- ============ How it works ============ -->
+  <section id="panel-about" role="tabpanel" aria-label="How it works" hidden>
+    <div class="prose">
+      <h1>How OpportunityScout works</h1>
+      <p><strong>This page is live data, not a mockup.</strong> Every opportunity links to its real official page, and a scraper checks those pages every week.</p>
+
+      <h2>The loop</h2>
+      <ol>
+        <li>A curated catalog of opportunities lives in <code>scout/opportunities.yaml</code> — each entry carries its official admissions/apply page URL.</li>
+        <li>Every Tuesday morning (AEST) a GitHub Actions job runs <code>scout/scraper.py</code>, which fetches each watched page, pulls out the text around deadline-related phrases ("applications close", "apply by", "deadline"…), extracts any dates, and compares against last week's snapshot.</li>
+        <li>If a page changed — a new deadline appeared, applications opened, a round closed — the job <strong>opens a GitHub issue</strong> in this repo listing exactly what changed. GitHub emails you the issue, so notifications arrive with zero extra infrastructure.</li>
+        <li>The job also regenerates this dashboard's data, so "days left" badges and "page changed" flags stay current.</li>
+      </ol>
+
+      <h2>Reading the badges</h2>
+      <ul>
+        <li><strong>Nd left</strong> — days until the listed deadline (red &lt; 30, amber &lt; 90, blue beyond).</li>
+        <li><strong>Rolling / batch</strong> — no fixed deadline; applications reviewed continuously or in batches.</li>
+        <li><strong>Closed — next cycle</strong> — this cycle's deadline passed; the scraper will flag when the next one is published.</li>
+        <li><strong>page changed</strong> — the scraper detected a change on the official page within the last 3 weeks. Click the row for the dates it spotted.</li>
+        <li><strong>fetch error</strong> — the page moved or blocked the scraper; the weekly issue includes these so links can be fixed.</li>
+      </ul>
+
+      <h2>Adding or removing opportunities</h2>
+      <p>Edit <code>scout/opportunities.yaml</code> (or ask Claude to), then run <code>python scout/scraper.py</code>. The dashboard, the watch-list and the notifications all follow from that one file. Set <code>watch: false</code> on an entry to keep it listed without scraping it.</p>
+
+      <h2>Off-the-shelf tools that do parts of this</h2>
+      <ul>
+        <li><strong>changedetection.io</strong> — open-source page-change watcher; the closest generic equivalent to this scraper.</li>
+        <li><strong>ProFellow</strong> — searchable database of ~2,900 fellowships with a free account.</li>
+        <li><strong>FindAMasters</strong> — masters-program search with saved-search email alerts.</li>
+        <li><strong>F6S</strong> — startup-program directory with application deadlines and alerts.</li>
+        <li><strong>Visualping / Distill.io</strong> — commercial page-change monitors with free tiers.</li>
+      </ul>
+      <p>None of them combine a profile-matched shortlist across grad programs + scholarships + incubators with change alerts — which is why this exists.</p>
+
+      <h2>Honest limitations</h2>
+      <ul>
+        <li>Some sites render deadlines with JavaScript or block bots; those entries show "fetch error" and need a manual check (the weekly issue lists them).</li>
+        <li>Date extraction is regex-based — it flags changes reliably, but always confirm a deadline on the official page before planning around it.</li>
+        <li>The catalog is curated, not exhaustive: it's the shortlist that fits this profile, not a directory of everything.</li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Live tool — data is real; verify deadlines on official pages before relying on them. Part of the second-order plays series. <a href="../index.html">← All demos</a>
+</footer>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<aside class="slideover" id="slideover" role="dialog" aria-modal="true" aria-label="Opportunity details"></aside>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
