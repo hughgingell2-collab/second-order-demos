@@ -1,898 +1,851 @@
 # OpportunityScout catalog — single source of truth.
-# Researched August 2026 for the 2026-27 application cycle (mostly 2027 entry).
-# Dates marked "expected" in deadlineNote are extrapolated from the last published
-# cycle; the scraper watches each url and flags when real dates appear.
-#
-# Schema:
-#   programs:       id, university, program, degree, category (ai-masters|law-tech|mba),
-#                   opens, deadline (ISO, drives days-left badge), deadlineNote, tuition,
-#                   tuitionSort (rough annual USD for sorting), fit, url, watch (default true)
-#   scholarships:   id, name, funds, value, eligibility, opens, deadline, deadlineNote, url
-#   startupSupport: id, name, region (AU|US|World), location, offer, equity, cadence,
-#                   deadline, deadlineNote, fit, url
+# Researched August 2026. Dates flagged "expected" are pattern-based projections
+# from the last published cycle; the scraper watches each url and flags when the
+# real dates appear. Format per entry:
+#   id (stable), name, category, sub (small tag), blurb (<=2 sentences),
+#   prepare (1 sentence), deadline (ISO or null), deadlineNote, cadence,
+#   url (page where dates are published — this is what gets scraped),
+#   watch: false to list without scraping.
+# Applied / not-interested record lives in scout/status.yaml.
 
 profile:
   summary: >
-    Australian lawyer pivoting into AI — target areas: artificial intelligence,
-    AI applied to law, AI governance. Study targets: Stanford, Harvard,
-    Penn/Wharton, Oxford, Cambridge. Startup focus: AI / legal-tech, AU + US.
+    Australian lawyer (Sydney; energy & infrastructure M&A background) pivoting
+    into AI — building TerraCheck (AI due diligence for property/infrastructure)
+    toward an AI-native law firm for infrastructure M&A. Study targets: Stanford,
+    Harvard, Penn/Wharton, Oxford, Cambridge.
 
-programs:
-  # ---------- AI / CS / data-science masters ----------
+categories:
+  - key: study
+    label: Further study opportunities
+    tab: Study
+    intro: >
+      Masters programs for the AI pivot at Stanford, Harvard, Penn/Wharton,
+      Oxford and Cambridge — the realistic shortlist for a lawyer without a CS
+      undergrad, across AI/CS, law + technology, and MBA routes.
+  - key: startup
+    label: Startup programs & funding
+    tab: Startups
+    intro: >
+      Incubators, accelerators, founder fellowships and grants for TerraCheck —
+      Australia and the USA in focus. Antler is already marked applied from your
+      record.
+  - key: pitch-syd
+    label: Pitch events — Sydney
+    tab: Pitch · SYD
+    intro: >
+      Recurring Sydney stages to pitch or demo TerraCheck in front of investors —
+      from monthly low-stakes reps to the year's flagship showcases.
+  - key: pitch-sf
+    label: Pitch events — San Francisco
+    tab: Pitch · SF
+    intro: >
+      Bay Area pitch competitions, demo nights and conferences worth planning a
+      trip around — AI-native crowds and the two legal-tech-relevant stages.
+  - key: other
+    label: Other opportunities
+    tab: Other
+    intro: >
+      Scholarships, fellowships and money that fund the pivot itself — full-ride
+      study funding, AI-policy fellowships, and Australian tax/grant levers.
+
+opportunities:
+  # ================= 1. FURTHER STUDY =================
   - id: penn-mas-cs-online
-    university: University of Pennsylvania (Penn Engineering)
-    program: MAS in Computer Science Online (successor to MCIT Online)
-    degree: MAS, online, part-time friendly
-    category: ai-masters
-    opens: Rolling cohorts (Spring/Fall) — open now
+    name: Penn MAS in Computer Science Online
+    category: study
+    sub: AI/CS masters
+    blurb: >
+      The renamed MCIT Online — an Ivy League CS masters explicitly designed for
+      people with no CS background, now with an AI concentration. Online and
+      part-time friendly, so you can build TerraCheck while studying (~US$40k total).
+    prepare: Transcripts, resume, personal statement and references — no CS degree or GRE required.
     deadline: "2026-10-19"
-    deadlineNote: >
-      Regular admission deadline for the next cohort. MCIT Online stopped taking
-      applications in 2026 and was replaced by MAS-CS Online — same
-      designed-for-non-CS curriculum, now with an Artificial Intelligence
-      concentration.
-    tuition: ~US$37–40k total
-    tuitionSort: 20000
-    fit: >
-      Best-in-class fit — explicitly designed for students with no CS background;
-      AI concentration; study online while still practising law.
+    deadlineNote: Regular deadline for the next cohort; scholarship round closed 3 Aug 2026.
     url: https://online.seas.upenn.edu/degrees/mas-cs-online/
 
   - id: harvard-alm-ds
-    university: Harvard University (Extension School)
-    program: ALM in Data Science and Artificial Intelligence
-    degree: ALM, part-time, mostly online
-    category: ai-masters
-    opens: Register each term (Jan / June / Sept) — no upfront application
+    name: Harvard ALM in Data Science & AI (Extension)
+    category: study
+    sub: AI/CS masters
+    blurb: >
+      Harvard's "earn your way in" part-time masters — pass 2–3 qualifying courses
+      with B+ and you're admitted, no application gamble. ~US$41k total and mostly
+      online; less prestigious than SEAS but a genuine Harvard credential.
+    prepare: Just register for a qualifying course next term (Jan/June/Sept) and show Python/calculus proficiency.
     deadline: null
-    deadlineNote: >
-      "Earn your way in": complete 2–3 qualifying courses with B+ grades, then
-      apply for admission. Course registration deadlines each term rather than
-      an admissions deadline.
-    tuition: ~US$41k total ($3,440/course)
-    tuitionSort: 14000
-    fit: >
-      Excellent career-changer fit — no CS degree required, low-risk entry,
-      Harvard brand; less prestigious than the SEAS SM.
+    cadence: Enrol each term (Jan / June / Sept)
+    deadlineNote: No admissions deadline — course registration each term instead.
     url: https://extension.harvard.edu/academics/programs/data-science-graduate-program/
 
-  - id: harvard-sm-ds
-    university: Harvard University (SEAS)
-    program: SM in Data Science
-    degree: SM, 3 semesters
-    category: ai-masters
-    opens: September 2026
-    deadline: "2026-12-01"
-    deadlineNote: Confirmed for Fall 2027 entry — December 1, 2026, 5pm ET. Single annual deadline.
-    tuition: ~US$65k/yr
-    tuitionSort: 65000
-    fit: >
-      Marginal — formally open to any bachelor's but expects real calculus,
-      linear algebra, statistics and Python preparation.
-    url: https://seas.harvard.edu/masters-data-science/how-apply
-
   - id: oxford-oii-sds
-    university: University of Oxford (Oxford Internet Institute)
-    program: MSc in Social Data Science
-    degree: MSc, 10 months
-    category: ai-masters
-    opens: September 2026
+    name: Oxford MSc in Social Data Science (OII)
+    category: study
+    sub: AI/CS masters
+    blurb: >
+      The accessible Oxford data-science route — the Oxford Internet Institute
+      takes law/social-science backgrounds with basic quantitative aptitude.
+      Strong AI-governance angle for an AI-and-law positioning.
+    prepare: Transcripts, references, personal statement plus evidence of basic Python/statistics.
     deadline: "2026-11-14"
-    deadlineNote: >
-      Expected first deadline window (2026 entry was 14 Nov 2025 and 9 Jan 2026);
-      November deadline needed for most scholarships. 2027 dates publish ~Sept 2026.
-    tuition: ~£35k
-    tuitionSort: 45000
-    fit: >
-      Good fit — OII accepts law/social-science backgrounds with basic
-      quantitative aptitude; strong AI-governance angle.
+    deadlineNote: Expected first window (2026 entry was 14 Nov + 9 Jan); November needed for scholarships. 2027 dates publish ~Sept 2026.
     url: https://www.ox.ac.uk/admissions/graduate/courses/msc-social-data-science
 
-  - id: stanford-mscs
-    university: Stanford University
-    program: MS in Computer Science (AI specialisation)
-    degree: MS
-    category: ai-masters
-    opens: Late September 2026 (expected)
-    deadline: "2026-12-01"
-    deadlineNote: >
-      Expected — Fall 2026 entry closed Dec 2, 2025; Fall 2027 dates not yet
-      posted. One round per year.
-    tuition: ~US$65–70k/yr
-    tuitionSort: 68000
-    fit: >
-      Long shot without a CS/math undergrad — admits overwhelmingly technical
-      backgrounds; extremely competitive.
-    url: https://www.cs.stanford.edu/admissions/ms
-
-  - id: penn-mse-ds
-    university: University of Pennsylvania (Penn Engineering)
-    program: MSE in Data Science (on-campus)
-    degree: MSE
-    category: ai-masters
-    opens: September 2026 (expected)
-    deadline: "2027-02-01"
-    deadlineNote: Expected regular deadline (Feb 1 pattern); early round ~Nov 2026.
-    tuition: ~US$100k total
-    tuitionSort: 62000
-    fit: Marginal — open to non-CS majors on paper but requires demonstrated programming and maths coursework.
-    url: https://gradadm.seas.upenn.edu/masters/data-science/
-
-  - id: cambridge-mlmi
-    university: University of Cambridge
-    program: MPhil in Machine Learning and Machine Intelligence (MLMI)
-    degree: MPhil, 11 months
-    category: ai-masters
-    opens: Early September 2026
-    deadline: "2026-10-15"
-    deadlineNote: >
-      Expected — closes far earlier than most Cambridge courses (2026 entry
-      closed 15 Oct 2025) due to volume. Apply in September.
-    tuition: ~£48k incl. college fee
-    tuitionSort: 61000
-    fit: Long shot — expects strong maths (linear algebra, probability) and programming.
-    url: https://www.postgraduate.study.cam.ac.uk/courses/directory/egegmpmsl
-
-  - id: cambridge-acs
-    university: University of Cambridge
-    program: MPhil in Advanced Computer Science (ACS)
-    degree: MPhil, 9 months
-    category: ai-masters
-    opens: Early September 2026
-    deadline: "2026-12-02"
-    deadlineNote: >
-      Funding deadline (Gates / Cambridge Trust) — expected ~2 Dec 2026; final
-      course deadline runs to late Feb 2027.
-    tuition: £48,192/yr overseas (confirmed 2026-27)
-    tuitionSort: 61500
-    fit: Long shot — requires a top-of-class CS undergraduate degree.
-    url: https://www.cst.cam.ac.uk/admissions/acs
-
-  - id: oxford-msc-acs
-    university: University of Oxford
-    program: MSc in Advanced Computer Science
-    degree: MSc, 1 year
-    category: ai-masters
-    opens: September 2026
-    deadline: "2027-01-08"
-    deadlineNote: Expected (2026-27 entry closed 12 noon UK, 8 Jan 2026); 2027-28 dates publish ~Sept 2026.
-    tuition: £43,730/yr overseas (2026-27)
-    tuitionSort: 56000
-    fit: Long shot — requires a first-class CS or heavily mathematical undergraduate degree.
-    url: https://www.ox.ac.uk/admissions/graduate/courses/msc-advanced-computer-science
-
-  - id: mit-eecs
-    university: MIT
-    program: EECS graduate program (SM/PhD track)
-    degree: SM/PhD
-    category: ai-masters
-    opens: September 2026 (expected)
-    deadline: "2026-12-15"
-    deadlineNote: >
-      Reality check — MIT EECS admits no external standalone masters students;
-      the MEng is MIT-undergrads-only and external admits enter the doctoral
-      track. Listed so the door is documented, not because it's a route.
-    tuition: ~US$62k/yr
-    tuitionSort: 62000
-    fit: Not viable for a career-changer masters — consider MITx MicroMasters or MIT Sloan instead.
-    url: https://www.eecs.mit.edu/academics/graduate-programs/admission-process/
-
-  # ---------- Law + technology ----------
   - id: stanford-llm-lst
-    university: Stanford University (Stanford Law School)
-    program: LLM in Law, Science & Technology
-    degree: LLM, 9 months
-    category: law-tech
-    opens: Mid-September 2026
+    name: Stanford LLM in Law, Science & Technology
+    category: study
+    sub: Law + tech
+    blurb: >
+      THE AI-and-law credential — home of CodeX, Stanford's legal informatics
+      centre, and designed exactly for foreign-trained lawyers pivoting to tech.
+      Nine months, ~US$75k tuition.
+    prepare: Law transcripts, CV, references and a personal statement tying your infrastructure-M&A + AI story to their program.
     deadline: "2026-12-01"
-    deadlineNote: Established annual pattern — Dec 1, 11:59pm PT, for Fall 2027 entry. For foreign-trained lawyers.
-    tuition: ~US$75k/yr
-    tuitionSort: 75000
-    fit: >
-      Flagship fit — THE AI-and-law credential; home of CodeX (Center for Legal
-      Informatics); designed exactly for foreign lawyers pivoting to tech.
+    deadlineNote: Established annual pattern — Dec 1, 11:59pm PT, for Fall 2027 entry.
     url: https://law.stanford.edu/apply/how-to-apply/advanced-degree-application-process/
 
   - id: harvard-llm
-    university: Harvard University (Harvard Law School)
-    program: LLM — AI / tech governance electives, Berkman Klein Center
-    degree: LLM, 9 months
-    category: law-tech
-    opens: September 2026
+    name: Harvard Law School LLM
+    category: study
+    sub: Law + tech
+    blurb: >
+      The classic elite LLM with deep AI/tech-governance electives and the
+      Berkman Klein Center. Very competitive for Australian practitioners;
+      stacks with the Australian-only Harvard scholarships below.
+    prepare: Law transcripts, references, personal statement; submit by Nov 15 for comfort.
     deadline: "2026-12-01"
-    deadlineNote: Confirmed for 2027-28 intake — Dec 1, 2026, 11:59pm ET; submitting by Nov 15 recommended.
-    tuition: US$80,760/yr (2025-26)
-    tuitionSort: 81000
-    fit: Strong — general LLM with deep tech-law electives; very competitive for Australian practitioners.
+    deadlineNote: Confirmed for 2027-28 intake — Dec 1, 2026, 11:59pm ET.
     url: https://hls.harvard.edu/graduate-program/graduate-program-admissions-and-financial-aid/ll-m-admissions/ll-m-application-deadlines-and-materials/
 
   - id: penn-law-llm
-    university: University of Pennsylvania (Penn Carey Law)
-    program: LLM — Wharton & Penn Engineering cross-registration
-    degree: LLM, 9 months
-    category: law-tech
-    opens: "2026-09-01"
+    name: Penn Carey Law LLM
+    category: study
+    sub: Law + tech
+    blurb: >
+      The most flexible US LLM for a tech crossover — cross-register at Wharton
+      and Penn Engineering, with a Wharton Business & Law Certificate available.
+      Priority ~Nov 15, regular ~Dec 15, then rolling with a late fee.
+    prepare: Law transcripts, CV, references and personal statement.
     deadline: "2026-12-15"
-    deadlineNote: >
-      Pattern from last cycle — priority ~Nov 15, regular ~Dec 15, then rolling
-      with a late fee. Wharton Business & Law Certificate available to LLMs.
-    tuition: ~US$80k/yr
-    tuitionSort: 80000
-    fit: >
-      Strong — the most flexible US LLM for tech crossover (Wharton certificate,
-      engineering cross-registration).
+    deadlineNote: Pattern from last cycle; application opens 1 Sept 2026.
     url: https://www.law.upenn.edu/admissions/grad/admissions.php
 
   - id: oxford-bcl
-    university: University of Oxford (Faculty of Law)
-    program: Bachelor of Civil Law (BCL) — Law and Computer Science option
-    degree: BCL (graduate law masters), 1 year
-    category: law-tech
-    opens: September 2026
+    name: Oxford BCL (Law and Computer Science option)
+    category: study
+    sub: Law + tech
+    blurb: >
+      The most prestigious common-law masters, and its Law and Computer Science
+      option — co-taught with the CS department — is directly AI-relevant.
+      Excellent fit for an Australian lawyer; £45,590 overseas.
+    prepare: First-class law transcripts, academic references and a strong personal statement — the January deadline also governs most scholarships.
     deadline: "2027-01-28"
-    deadlineNote: Expected late-January deadline (2026-27 cycle pattern); also governs most scholarships.
-    tuition: £45,590/yr overseas (2026-27)
-    tuitionSort: 58000
-    fit: >
-      Excellent for an Australian lawyer — the most prestigious common-law
-      masters; the Law and Computer Science option (co-taught with the CS
-      department) is directly AI-relevant.
+    deadlineNote: Expected late-January deadline based on the 2026-27 cycle.
     url: https://www.ox.ac.uk/admissions/graduate/courses/bachelor-civil-law
 
   - id: cambridge-llm
-    university: University of Cambridge (Faculty of Law)
-    program: LLM — tech papers; Leverhulme CFI ecosystem
-    degree: LLM, 9 months
-    category: law-tech
-    opens: Early September 2026
+    name: Cambridge LLM
+    category: study
+    sub: Law + tech
+    blurb: >
+      Classic elite LLM with tech-law papers and the Leverhulme Centre for the
+      Future of Intelligence in the ecosystem. Hard deadline, no late round —
+      and Gates Cambridge funding shares the same date.
+    prepare: Law transcripts, references and personal statement, ready by early December.
     deadline: "2026-12-02"
-    deadlineNote: Expected (2026 entry closed 2 Dec 2025). Hard deadline, no late round; Gates funding same date.
-    tuition: ~£42–45k/yr overseas incl. college fee
-    tuitionSort: 55000
-    fit: Strong — classic elite LLM; AI exposure via seminar papers and the Leverhulme Centre for the Future of Intelligence.
+    deadlineNote: Expected (2026 entry closed 2 Dec 2025); Gates funding same date.
     url: https://llm.law.cam.ac.uk/admissions/summary-key-dates
 
-  - id: oxford-mlf
-    university: University of Oxford (Law / Saïd)
-    program: MSc in Law and Finance (MLF)
-    degree: MSc, 10 months
-    category: law-tech
-    opens: September 2026
-    deadline: "2027-01-28"
-    deadlineNote: Expected (2026 entry closed 28 Jan 2026); fintech/tech-regulation electives available.
-    tuition: £53,340/yr (2026-27)
-    tuitionSort: 68000
-    fit: Moderate — finance rather than AI focus; suits a commercial lawyer adding quantitative credentials.
-    url: https://www.ox.ac.uk/admissions/graduate/courses/msc-law-and-finance
-
-  - id: oxford-pgdip-ip
-    university: University of Oxford (Faculty of Law)
-    program: PGDip in Intellectual Property Law and Practice
-    degree: PGDip, 1 year part-time
-    category: law-tech
-    opens: Early 2027 (expected)
-    deadline: "2027-07-10"
-    deadlineNote: Expected (2026-27 cycle closed 10 July 2026). Part-time, compatible with working.
-    tuition: ~£16k
-    tuitionSort: 20000
-    fit: Good practise-while-studying option — IP/patents angle on AI rather than a full pivot vehicle.
-    url: https://www.ox.ac.uk/admissions/graduate/courses/pgdip-intellectual-property-law-and-practice
-
-  # ---------- MBA / management ----------
   - id: wharton-mba-ai
-    university: University of Pennsylvania (Wharton)
-    program: MBA — Major in Artificial Intelligence for Business
-    degree: MBA, 2 years
-    category: mba
-    opens: July 2026 (application live)
+    name: Wharton MBA — AI for Business major
+    category: study
+    sub: MBA
+    blurb: >
+      The only M7 MBA with a formal STEM-certified AI major (launched 2025) — and
+      no technical prerequisites, so a lawyer is a normal admit. Probably the
+      highest-probability elite-brand path combining admission odds and AI content.
+    prepare: GMAT/GRE, essays, two references and the online application — R1 is three weeks away.
     deadline: "2026-09-08"
-    deadlineNote: "Confirmed 2026-27 rounds: R1 Sep 8 2026, R2 Jan 5 2027, R3 Mar 31 2027. STEM-certified AI major, declared after admission."
-    tuition: ~US$92k/yr
-    tuitionSort: 92000
-    fit: Strong — no technical prerequisites; a lawyer is a normal MBA admit; AI major gives applied ML + AI-ethics curriculum.
+    deadlineNote: "Confirmed rounds: R1 Sep 8 2026, R2 Jan 5 2027, R3 Mar 31 2027."
     url: https://mba.wharton.upenn.edu/application-timeline-deadlines/
 
-  - id: stanford-gsb-mba
-    university: Stanford University (GSB)
-    program: MBA — AI electives, joint CS courses
-    degree: MBA, 2 years
-    category: mba
-    opens: June–July 2026 (application live)
-    deadline: "2026-09-09"
-    deadlineNote: "Confirmed R1 Sep 9 2026, 4pm PT; R2 early Jan 2027; R3 early Apr 2027."
-    tuition: ~US$84.5k/yr
-    tuitionSort: 84500
-    fit: Strong content fit; hardest MBA admit in the world (~6%).
-    url: https://www.gsb.stanford.edu/programs/mba/admission/application/deadlines
-
-  - id: stanford-msx
-    university: Stanford University (GSB)
-    program: MSx — MS in Management for mid-career leaders
-    degree: MS, 12 months full-time
-    category: mba
-    opens: Mid-2026 (application live)
-    deadline: "2026-10-08"
-    deadlineNote: "Confirmed R1 Oct 8 2026; R2 Jan 6 2027; R3 Feb 11 2027. Requires ~8+ years work experience."
-    tuition: US$143k total tuition
-    tuitionSort: 143000
-    fit: Good for a senior lawyer (8+ yrs) pivoting to AI product/strategy; can cross-register Stanford CS/AI courses.
-    url: https://www.gsb.stanford.edu/programs/msx/admission/deadlines
-
-  - id: hbs-mba
-    university: Harvard University (HBS)
-    program: MBA
-    degree: MBA, 2 years
-    category: mba
-    opens: June 2026 (application live)
-    deadline: "2026-09-09"
-    deadlineNote: "Confirmed Class of 2029: R1 Sep 9 2026 (noon ET), R2 Jan 5 2027. Only two rounds."
-    tuition: ~US$78k/yr
-    tuitionSort: 78000
-    fit: Strong — generalist case-method degree; AI via electives and the D^3 institute.
-    url: https://www.hbs.edu/mba/admissions/application-process
-
-  - id: oxford-said-mba
-    university: University of Oxford (Saïd Business School)
-    program: Oxford MBA
-    degree: MBA, 1 year
-    category: mba
-    opens: Mid-2026 (application live)
-    deadline: "2026-09-02"
-    deadlineNote: "Confirmed 2027-entry stages: Sep 2, Oct 5, Nov 4 2026; Jan 6, Mar 15 2027. January stage is the effective scholarship cutoff."
-    tuition: £94,120 total (2027-28 cohort)
-    tuitionSort: 120000
-    fit: Strong — 1-year format suits a career pivot; no technical prerequisites; OII and Saïd AI initiatives on tap.
-    url: https://www.sbs.ox.ac.uk/programmes/mbas/oxford-mba/how-apply
-
   - id: cambridge-judge-mba
-    university: University of Cambridge (Judge Business School)
-    program: Cambridge MBA
-    degree: MBA, 1 year
-    category: mba
-    opens: Mid-2026 (application live)
+    name: Cambridge MBA (Judge)
+    category: study
+    sub: MBA
+    blurb: >
+      One-year pivot degree (£80k total) with the Cambridge AI ecosystem
+      accessible via projects. Five rounds — the next closes in days; earlier
+      rounds favoured for scholarships and visas.
+    prepare: GMAT/GRE, essays and references — round 1 closes Aug 24.
     deadline: "2026-08-24"
-    deadlineNote: "Confirmed 2027-entry rounds: Aug 24, Oct 5 2026; Jan 4, Mar 22, May 4 2027. Earlier rounds favoured for scholarships/visa."
-    tuition: £80,000 total (Sept 2026 entry)
-    tuitionSort: 102000
-    fit: Strong — 1-year pivot degree; Cambridge AI ecosystem accessible via projects.
+    deadlineNote: "Confirmed 2027-entry rounds: Aug 24, Oct 5 2026; Jan 4, Mar 22, May 4 2027."
     url: https://www.jbs.cam.ac.uk/masters-degrees/mba/
 
-scholarships:
-  # ---------- open now / upcoming this cycle ----------
-  - id: openphil-transition
-    name: Open Philanthropy / Coefficient Giving — Career Transition Funding
-    funds: Graduate study anywhere (incl. Stanford/Oxbridge masters), self-study, career pivots into AI governance/safety
-    value: Case-by-case — can cover full tuition + living costs
-    eligibility: Any nationality, any career stage — explicitly designed for professionals (e.g. lawyers) pivoting into AI policy. Arguably the best-fit funder for this profile.
-    opens: Rolling — open now
-    deadline: null
-    deadlineNote: Rolling; decisions typically within ~6 weeks. Rebranded Coefficient Giving late 2025 — same program.
-    url: https://www.openphilanthropy.org/career-development-and-transition-funding/
+  - id: stanford-msx
+    name: Stanford MSx (mid-career MS in Management)
+    category: study
+    sub: MBA
+    blurb: >
+      Stanford GSB's 12-month degree for leaders with ~8+ years' experience —
+      your ~6.5 years law + banking gets close. Cross-register into Stanford
+      CS/AI courses; US$143k tuition.
+    prepare: GMAT/GRE, essays, references, and a clear 8-years-experience narrative.
+    deadline: "2026-10-08"
+    deadlineNote: "Confirmed R1 Oct 8 2026; R2 Jan 6 2027; R3 Feb 11 2027."
+    url: https://www.gsb.stanford.edu/programs/msx/admission/deadlines
 
-  - id: horizon-fellowship
-    name: Horizon Fellowship (AI policy placements, Washington DC)
-    funds: Not a degree — funded placements (up to 2 yrs) in US agencies/Congress/think tanks on AI policy
-    value: Salary support up to ~US$190k + training
-    eligibility: Some placements need US work authorisation — check constraints as an Australian. Strong alternative or sequel to a masters.
-    opens: Open now
+  # ================= 2. STARTUP PROGRAMS & FUNDING =================
+  - id: y-combinator
+    name: Y Combinator
+    category: startup
+    sub: US accelerator
+    blurb: >
+      US$500k (US$125k for 7% + US$375k uncapped SAFE) and the world's best
+      accelerator brand — YC funded Casetext, Lexion and much of the current
+      legal-AI cohort. Requires relocating to SF for the 3-month batch.
+    prepare: 10-minute application form + 1-minute founder video + product demo; traction optional but a working TerraCheck prototype helps enormously.
+    deadline: "2026-11-10"
+    deadlineNote: Expected Winter 2027 deadline (~10–12 Nov, unannounced); late applications accepted with reduced odds.
+    url: https://www.ycombinator.com/apply
+
+  - id: startmate
+    name: Startmate Accelerator
+    category: startup
+    sub: AU accelerator
+    blurb: >
+      ANZ's flagship accelerator — A$120k for ~7.5% plus a 12-week program and a
+      1,000-investor Demo Day. Has backed legal-tech/AI SaaS; the natural first
+      swing for an AU founder.
+    prepare: Online application + short founder video; a live demo and any pilot interest from lawyers/developers strengthens it.
+    deadline: "2026-11-03"
+    deadlineNote: Expected — Summer '27 apps likely open Oct 2026, close early Nov (pattern-based).
+    url: https://www.startmate.com/accelerator
+
+  - id: antler-au
+    name: Antler Australia (residency)
+    category: startup
+    sub: AU residency
+    blurb: >
+      Paid 8–10-week residency for pre-idea founders with co-founder matching,
+      then ~A$260k for teams passing the investment committee. You've applied
+      with TerraCheck — tracked here for outcome and future intakes.
+    prepare: Already applied — prepare for interviews and the residency's validation sprints.
+    deadline: null
+    cadence: 2 residencies/yr (Feb + ~Aug); rolling applications
+    deadlineNote: Rolling — next intake dates on the page.
+    url: https://www.antler.co/location/australia
+
+  - id: blackbird-giants
+    name: Blackbird Giants
+    category: startup
+    sub: AU program
+    blurb: >
+      Blackbird's free, equity-free 8-week mentoring program for day-zero
+      founders — 1:1s with portfolio operators to validate an idea, and a warm
+      path to ANZ's biggest VC. Virtual ANZ cohort runs Aug–Sep; in-person
+      Sydney cohort ~Feb 2027.
+    prepare: Apply online with your idea and commit ~3 hrs/week for 8 weeks.
+    deadline: null
+    cadence: 2 in-person cohorts (Mar–May) + 1 virtual (Aug–Sep) per year
+    deadlineNote: 2026 in-person apps closed 8 Mar; check the page now for the virtual cohort, next window ~Feb 2027.
+    url: https://www.blackbird.vc/giants
+
+  - id: lander-rogers-lawtech
+    name: Lander & Rogers LawTech Hub
+    category: startup
+    sub: AU legal-tech
+    blurb: >
+      Australia's law-firm-embedded lawtech incubator: equity-free 6-month
+      residency inside the firm, testing your product with practising lawyers on
+      real client problems — 2026's cohort was AI-focused. On your own target list.
+    prepare: A working legal-tech/AI product suitable for testing inside a law firm; applications open ~Dec–Jan.
+    deadline: "2027-04-01"
+    deadlineNote: Expected (2026 cohort closed 1 Apr, started 14 May); watch for the 2027 call ~Dec 2026.
+    url: https://www.landers.com.au/legal-innovation/lawtech-hub
+
+  - id: nsw-mvp-ventures
+    name: NSW MVP Ventures Program
+    category: startup
+    sub: AU grant
+    blurb: >
+      NSW Government commercialisation grant of A$20k–75k, equity-free, for
+      products moving toward market — made for a Sydney-registered TerraCheck.
+      On your own target list.
+    prepare: Register an NSW company and frame TerraCheck as a TRL 3–9 commercialisation project before the next round opens.
+    deadline: null
+    cadence: ~3 rounds per financial year
+    deadlineNote: Between rounds — FY2026-27 Round 1 likely opens ~Sep 2026 (last year's pattern); the scraper watches for it.
+    url: https://www.nsw.gov.au/business-and-economy/innovation/grants-and-programs/mvp-ventures-program
+
+  - id: usyd-incubate
+    name: INCUBATE (University of Sydney)
+    category: startup
+    sub: AU incubator
+    blurb: >
+      USYD's accelerator — 14 weeks, A$5k equity-free, and a Demo Day to 250+
+      investors; as a USYD law alumnus you meet the affiliation requirement.
+      2026 cohort dates still TBC on the site.
+    prepare: A working MVP or in-market product plus the online application; register interest now since dates are TBC.
+    deadline: null
+    cadence: Roughly annual/semester cohorts
+    deadlineNote: 2026 dates TBC as of Aug 2026 — the scraper watches for the announcement.
+    url: https://incubate.org.au/accelerator-3/
+
+  - id: unsw-founders-10x
+    name: UNSW Founders 10x Accelerator
+    category: startup
+    sub: AU accelerator
+    blurb: >
+      A$100k via founder-friendly SAFE plus a 10-week program and 6 months
+      co-working. The All-Industries stream needs a UNSW link, but Health/Climate
+      streams are open to any AU founder.
+    prepare: Application with deck and MVP; check stream eligibility first if you have no UNSW affiliation.
+    deadline: "2027-05-18"
+    deadlineNote: Expected (2026 apps closed 18 May 2026).
+    url: https://unswfounders.com/10x-accelerator
+
+  - id: a16z-speedrun
+    name: a16z speedrun
+    category: startup
+    sub: US accelerator
+    blurb: >
+      Up to US$1M and a 12-week SF program from Andreessen Horowitz, now broad
+      AI including vertical SaaS. Its alpha pre-program is already on your list —
+      the SR008 application window is expected to be open around now.
+    prepare: Online application + demo; the alpha program (alpha.a16zspeedrun.com) is the lighter-touch entry you flagged.
+    deadline: "2026-09-28"
+    deadlineNote: Expected SR008 close (~late Sep 2026, pattern-based).
+    url: https://speedrun.a16z.com/apply
+
+  - id: south-park-commons
+    name: South Park Commons Founder Fellowship
+    category: startup
+    sub: US fellowship
+    blurb: >
+      US$1M total (US$400k upfront + US$600k guaranteed next round) for 7%, plus
+      an 8-week SF/NYC bootcamp — and you don't need an idea yet. Built exactly
+      for the "-1 to 0" exploration phase you're in.
+    prepare: Application essays about you and the spaces you'd explore; no deck or traction required.
+    deadline: "2027-01-15"
+    deadlineNote: Expected Spring 2027 window (~Dec 2026–Jan 2027); Fall 2026 closed 2 Aug.
+    url: https://www.southparkcommons.com/apply
+
+  - id: entrepreneur-first
+    name: Entrepreneur First
+    category: startup
+    sub: Global talent investor
+    blurb: >
+      Apply as an individual — EF exists to match domain experts with technical
+      co-founders, then invests ~US$250k at company formation. The strongest
+      option if you want a technical co-founder found for you.
+    prepare: Individual application (CV + ambition questions), no idea or team needed.
     deadline: "2026-08-30"
-    deadlineNote: Confirmed 2027-cohort deadline — closes 30 Aug 2026, 11:59pm AoE.
-    url: https://horizonpublicservice.org/programs/become-a-fellow/
+    deadlineNote: SF Bridge Fall '26 closes 30 Aug; Spring 2027 cohorts open ~Nov 2026–Jan 2027.
+    url: https://apply.joinef.com/
+
+  - id: skalata
+    name: Skalata Ventures
+    category: startup
+    sub: AU seed program
+    blurb: >
+      Up to A$250k staged funding plus a 6-month Melbourne seed program, for
+      full-time founders with early traction. The right door once TerraCheck has
+      first revenue or pilots.
+    prepare: Wait for first pilots/revenue, then apply with traction evidence — requires full-time commitment.
+    deadline: null
+    cadence: Rolling applications
+    deadlineNote: No published deadline.
+    url: https://www.skalata.vc/founders/get-investment
+
+  - id: sydney-vcs
+    name: Sydney pre-seed VCs — Blackbird / Side Stage / Tidal
+    category: startup
+    sub: AU VC
+    blurb: >
+      Your three listed funds, all pitch-anytime: Blackbird (ANZ's biggest, backs
+      pre-revenue), Side Stage (~A$50–500k first cheques) and Tidal (~A$500–750k,
+      strong AI/product focus). No deadlines — warm intros beat cold forms.
+    prepare: A tight deck (problem, wedge, market, you) and warm intros — use Startmate/Giants/Antler networks to get them.
+    deadline: null
+    cadence: Pitch anytime
+    deadlineNote: Watching Blackbird's site for open programs; Side Stage sidestage.vc, Tidal tidalvc.com.
+    url: https://www.blackbird.vc/
+
+  # ================= 3. PITCH EVENTS — SYDNEY =================
+  - id: lyra-demo-night
+    name: Lyra Capital Demo Night
+    category: pitch-syd
+    sub: Demo night
+    blurb: >
+      The 21 August demo night from your notes — Lyra Capital with January
+      Capital and NextGen Ventures at Millers Point; founders present things
+      they've actually built, demos not decks.
+    prepare: Register on the Luma page and bring a working TerraCheck demo.
+    deadline: "2026-08-21"
+    deadlineNote: This Friday 6–10pm, Level 7, 20 Windmill St, Millers Point — verify on the page.
+    url: https://luma.com/0dug0ppo
+
+  - id: fishburners-pitch
+    name: Fishburners Pitch Nights
+    category: pitch-syd
+    sub: Pitch night
+    blurb: >
+      Recurring themed pitch nights at Tech Central (including a dedicated AI
+      Pitch Night) — ~6 startups pitch to a room of investors and operators.
+      Last AI edition was 23 July 2026; next not yet listed.
+    prepare: Short EOI via Fishburners, then a ~5-min investor deck plus live Q&A.
+    deadline: null
+    cadence: Roughly quarterly, themed
+    deadlineNote: Next edition announced on the Humanitix host page — watched.
+    url: https://events.humanitix.com/host/5c2bfbc699bf740010077e0f
+
+  - id: sydney-angels
+    name: Sydney Angels funding cycles
+    category: pitch-syd
+    sub: Angel group
+    blurb: >
+      Australia's leading angel group — six cycles a year, ~40 applicants per
+      cycle, three pitch to full membership for typical investments of
+      A$300–500k backed by the A$10M Sidecar Fund.
+    prepare: Online application with company summary + investor deck; shortlisted founders give a full pitch with Q&A.
+    deadline: null
+    cadence: 6 cycles/yr, rolling applications
+    deadlineNote: Apply anytime via the founders page.
+    url: https://www.sydneyangels.net.au/founders
+
+  - id: innovation-bay
+    name: Innovation Bay Founder Dinners
+    category: pitch-syd
+    sub: Investor dinner
+    blurb: >
+      Invite-only dinners where a handful of founders pitch to Innovation Bay's
+      angel/VC community — alumni have raised A$45M+ through the format. Warm,
+      high-quality investor exposure rather than prize money.
+    prepare: Apply-to-pitch form with company details and deck; selected founders give a short dinner pitch.
+    deadline: null
+    cadence: Several dinners/yr, rolling
+    deadlineNote: Rolling — watched.
+    url: https://innovationbay.com/apply-to-pitch/
+
+  - id: tech23
+    name: Cicada x Tech23
+    category: pitch-syd
+    sub: Deep-tech showcase
+    blurb: >
+      Australia's biggest deep-tech showcase — 23 ventures selected from 230+
+      pitch to investors, corporates and government at Jones Bay Wharf; alumni
+      have raised US$280M+. 2026 edition is 9 September; 2027 applications open
+      early next year.
+    prepare: Written application when the annual call opens, then a short on-stage showcase pitch.
+    deadline: "2026-09-09"
+    deadlineNote: 2026 showcase date (applications closed 30 Apr); watch for the 2027 call ~Feb.
+    url: https://www.cicadainnovations.com/cicada-x-tech23
+
+  - id: spark-festival
+    name: Spark Festival
+    category: pitch-syd
+    sub: Festival
+    blurb: >
+      Australia's largest startup festival — a free week of events across NSW
+      anchored at Tech Central (Oct 27 – Nov 2, 2026), including pitch nights and
+      investor sessions you can apply to.
+    prepare: Register for a free pass, then apply to the individual pitch events inside the program.
+    deadline: "2026-10-27"
+    deadlineNote: Festival start date; program published closer to the date.
+    url: https://sparkfestival.co/
+
+  - id: startmate-demo-day
+    name: Startmate Demo Day
+    category: pitch-syd
+    sub: Demo day
+    blurb: >
+      Startmate's flagship — cohort founders pitch to 1,000+ investors (2024
+      filled the State Theatre). Pitching requires being in the accelerator;
+      attending is public and worth it for the investor room.
+    prepare: To pitch, get into the Startmate cohort; to attend, buy a ticket when the Winter '26 edition (~Oct/Nov) is announced.
+    deadline: null
+    cadence: Twice yearly (~Apr and ~Oct/Nov)
+    deadlineNote: Winter '26 edition expected ~Oct/Nov — watched.
+    url: https://www.startmate.com/demo-day
+
+  - id: antler-demo-day-syd
+    name: Antler Sydney Demo Day
+    category: pitch-syd
+    sub: Demo day
+    blurb: >
+      Where Antler residency cohorts pitch to investors — directly relevant given
+      your live application: pass the residency and this is your stage.
+      Also attendable to scout the standard.
+    prepare: Progress your Antler application; the demo-day pitch itself is ~5 minutes.
+    deadline: null
+    cadence: Per cohort, ~twice yearly
+    deadlineNote: Next Sydney edition announced on the page — watched.
+    url: https://demoday.antler.co/sydney/
+
+  - id: startup-world-cup-syd
+    name: Startup World Cup Sydney
+    category: pitch-syd
+    sub: Competition
+    blurb: >
+      Regional round of the global Startup World Cup — 10 startups pitch at Tank
+      Stream Labs, and the winner flies to San Francisco for the Grand Finale
+      with its US$1M investment prize. 2026 ran in June; next ~June 2027.
+    prepare: Apply via Startup&Angels when the call opens; ~4-min deck plus judge Q&A.
+    deadline: null
+    cadence: Annual, ~June (plus other investor nights year-round)
+    deadlineNote: 2026 edition was 17 June — watched for 2027.
+    url: https://www.startupandangels.com/events/sydney/
+
+  - id: startup-valley-syd
+    name: Startup Valley Sydney Pitch Night
+    category: pitch-syd
+    sub: Pitch night
+    blurb: >
+      Monthly curated pitch-and-networking night at the Harbour View Hotel — live
+      pitches with direct investor feedback. Low-stakes monthly reps to sharpen
+      the TerraCheck pitch.
+    prepare: Speaker application on their site; short deck plus live Q&A.
+    deadline: null
+    cadence: Monthly (usually a Friday evening)
+    deadlineNote: Dates listed per month on the city page.
+    url: https://startupvalley.club/
+
+  - id: stone-chalk-events
+    name: Stone & Chalk / Tech Central events
+    category: pitch-syd
+    sub: Ecosystem
+    blurb: >
+      Ongoing investor mixers, ecosystem nights with open pitch slots, and
+      showcases at Tech Central — the recurring page to watch for open Sydney
+      stages, with a strong regtech community.
+    prepare: Register per event (usually free) and keep a 1–2 minute elevator pitch ready.
+    deadline: null
+    cadence: Multiple events per month
+    deadlineNote: Rolling calendar — watched.
+    url: https://www.stoneandchalk.com.au/events
+
+  - id: legaltech-venture-day
+    name: LegalTech Venture Day Australia (UNSW Allens Hub)
+    category: pitch-syd
+    sub: Legal-tech comp
+    blurb: >
+      The most legal-tech-relevant Sydney competition — startups pitch to a panel
+      from law firms, LexisNexis, ALTA and IE Law School. Possibly dormant (last
+      confirmed 2023), watched in case it revives.
+    prepare: If it returns — application with pitch deck, then a short live pitch to the judging panel.
+    deadline: null
+    cadence: Was annual, ~May
+    deadlineNote: Possibly dormant — the Allens Hub events page is watched for a revival.
+    url: https://allenshub.unsw.edu.au/events
+
+  # ================= 4. PITCH EVENTS — SAN FRANCISCO =================
+  - id: tc-disrupt-battlefield
+    name: TechCrunch Disrupt — Startup Battlefield 200
+    category: pitch-sf
+    sub: Competition
+    blurb: >
+      The famous one: 200 selected startups exhibit free at Disrupt (Oct 13–15,
+      2026) and a top 20 pitch live for US$100k equity-free plus huge
+      investor/media exposure. Open to international pre-Series A startups.
+    prepare: Working product, traction summary and pitch video — 2026 applications closed in June, so target the ~Apr 2027 window.
+    deadline: "2026-10-13"
+    deadlineNote: Event dates; Battlefield 2027 applications expected ~Apr 2027 — watched.
+    url: https://techcrunch.com/events/techcrunch-disrupt/
+
+  - id: ai-collective-pitch
+    name: SF Pitch Night — The AI Collective
+    category: pitch-sf
+    sub: AI pitch night
+    blurb: >
+      Recurring AI pitch night from the 25,000-member AI Collective — six
+      hand-picked teams pitch to VC/operator judges with live audience voting.
+      The right room for an AI-native legal product.
+    prepare: Apply via the Luma page with a 3–5 minute demo-led pitch.
+    deadline: null
+    cadence: Every 1–2 months
+    deadlineNote: Next edition announced on the Luma page — watched.
+    url: https://luma.com/sf-pitch
+
+  - id: ai-tinkerers-sf
+    name: AI Tinkerers San Francisco
+    category: pitch-sf
+    sub: Demo night
+    blurb: >
+      Monthly technical demo night — builders show real working systems (no
+      decks) to engineers, founders and investors. Ideal credibility-building
+      for TerraCheck's demo; next event Aug 26.
+    prepare: Apply to demo with a working AI project you can show live.
+    deadline: "2026-08-26"
+    deadlineNote: August demo night; subsequent events posted on the same page.
+    url: https://sf.aitinkerers.org/
+
+  - id: yc-startup-school
+    name: YC Startup School SF (+ Demo Day reality check)
+    category: pitch-sf
+    sub: YC events
+    blurb: >
+      YC Demo Days are invite-only — outsiders can't pitch or attend; the
+      accessible YC event is Startup School SF, a free 2-day founder gathering
+      (last held July 2026). The way onto a Demo Day stage is getting into a batch.
+    prepare: Register free when the next Startup School opens; otherwise focus on the YC batch application above.
+    deadline: null
+    cadence: Startup School ~annual; Demo Days quarterly (invite-only)
+    deadlineNote: Events page watched for the next open event.
+    url: https://events.ycombinator.com/
+
+  - id: berkeley-skydeck
+    name: Berkeley SkyDeck (Demo Day + batch)
+    category: pitch-sf
+    sub: Accelerator
+    blurb: >
+      UC Berkeley's accelerator — US$210k from the SkyDeck Fund and a Demo Day in
+      front of 1,000+ investors, with strong international-founder
+      representation. Batch 23 applications close Aug 21.
+    prepare: Deck + traction via the online application — this window closes in days.
+    deadline: "2026-08-21"
+    deadlineNote: Batch 23 deadline; two windows per year, demo days ~Apr and ~Sep.
+    url: https://skydeck.berkeley.edu/apply/
+
+  - id: band-of-angels
+    name: Band of Angels Deal Dinner
+    category: pitch-sf
+    sub: Angel group
+    blurb: >
+      Silicon Valley's oldest angel group (150+ tech-exec investors) — ~50
+      startups screened monthly, three pitch at the monthly Deal Dinner, with
+      free pitch coaching for those selected.
+    prepare: Submit the rolling apply-to-present form with deck + summary.
+    deadline: null
+    cadence: Monthly (third Wednesday)
+    deadlineNote: Rolling — apply anytime.
+    url: https://www.bandangels.com/apply-to-present
+
+  - id: saastr-pitch
+    name: SaaStr AI Annual — Pitch Competition
+    category: pitch-sf
+    sub: SaaS conf
+    blurb: >
+      Pitch competition inside the 10,000-attendee #1 B2B SaaS + AI conference —
+      selected AI-native SaaS startups pitch to leading VCs with heavy 1:1
+      meeting infrastructure. Very relevant for B2B legal-tech SaaS.
+    prepare: B2B/AI SaaS deck with revenue traction via the pitch-comp application.
+    deadline: null
+    cadence: Annual, ~May
+    deadlineNote: 2026 edition passed; ~May 2027 expected — watched.
+    url: https://www.saastrannual.com/
+
+  - id: startup-grind-battle
+    name: Startup Grind Conference + Global Pitch Battle
+    category: pitch-sf
+    sub: Competition
+    blurb: >
+      Flagship founder conference (Apr 27–28, 2027) with an exhibition program
+      and the Global Pitch Battle — exhibitors collectively booked 400+ investor
+      meetings last edition.
+    prepare: Apply to the startup program / pitch battle with a deck and a one-minute pitch in the months before.
+    deadline: "2027-04-27"
+    deadlineNote: Conference dates; applications open in the preceding months.
+    url: https://www.startupgrind.tech/
+
+  - id: cerebral-valley
+    name: Cerebral Valley AI Summit
+    category: pitch-sf
+    sub: AI summit
+    blurb: >
+      The invite-only who's-who AI summit (next edition Nov 12, 2026) with top AI
+      CEOs and VCs; founder tickets are US$99 but attendance is
+      application-based. High signal if you can get in.
+    prepare: Apply for a founder invite with a credible AI startup story.
+    deadline: "2026-11-12"
+    deadlineNote: Invite-only — not an open pitch competition.
+    url: https://cerebralvalley.com/
+
+  - id: ai-engineer-fair
+    name: AI Engineer World's Fair
+    category: pitch-sf
+    sub: AI conference
+    blurb: >
+      The largest technical AI-engineering conference (Moscone West; next Jun
+      29 – Jul 2, 2027) — speaker slots and the expo floor give early-stage AI
+      startups strong exposure to engineers and investors.
+    prepare: Submit a talk via the CFP when it opens, or book a startup expo booth.
+    deadline: "2027-06-29"
+    deadlineNote: 2027 edition dates.
+    url: https://www.ai.engineer/
+
+  - id: legal-innovators-ca
+    name: Legal Innovators California
+    category: pitch-sf
+    sub: Legal-tech conf
+    blurb: >
+      The US West Coast's main legal-innovation conference (SF, ~June) — ~125
+      speakers with law-firm and in-house buyers in the room. The best SF-native
+      venue for a legal-tech founder to demo and meet buyers.
+    prepare: Contact organisers early for a startup speaking/exhibitor slot and bring a buyer-ready demo.
+    deadline: null
+    cadence: Annual, ~June
+    deadlineNote: 2026 edition passed (Jun 10–11); 2027 dates announced ~Q1 — watched.
+    url: https://www.legalinnovatorscalifornia.com/
+
+  # ================= 5. OTHER OPPORTUNITIES =================
+  - id: openphil-transition
+    name: Open Philanthropy — Career Transition Funding
+    category: other
+    sub: Pivot funding
+    blurb: >
+      Rolling case-by-case funding (can cover full tuition + living costs) for
+      professionals pivoting into AI governance/policy — arguably the single
+      best-fit funder for a lawyer's AI pivot. Decisions typically within ~6 weeks.
+    prepare: A concise application making the AI-governance case for your study or transition plan — apply any time, ideally with offers in hand.
+    deadline: null
+    cadence: Rolling
+    deadlineNote: Rebranded Coefficient Giving late 2025 — same program.
+    url: https://www.openphilanthropy.org/career-development-and-transition-funding/
 
   - id: knight-hennessy
     name: Knight-Hennessy Scholars (Stanford)
-    funds: Any full-time Stanford graduate degree — MS, MBA/MSx, LLM, PhD
-    value: Full — tuition + stipend + travel, up to 3 years
-    eligibility: Any nationality BUT bachelor's must be earned Jan 2020 or later for the 2027 cohort (7-year rule) — verify against your graduation year before writing it off.
-    opens: "2026-06-01"
+    category: other
+    sub: Full ride
+    blurb: >
+      Full funding (tuition + stipend + travel, up to 3 years) for any Stanford
+      graduate degree, including the LLM and MSx. Hard rule: bachelor's earned
+      Jan 2020 or later for the 2027 cohort — check your graduation year first.
+    prepare: KH application (essays, video, references) by Oct 6 plus the Stanford degree application by ~Dec 1.
     deadline: "2026-10-06"
-    deadlineNote: Confirmed — KH application due 6 Oct 2026 1pm PT; the Stanford degree application is also required (by ~1 Dec 2026).
+    deadlineNote: Confirmed — 6 Oct 2026, 1pm PT.
     url: https://knight-hennessy.stanford.edu/admission/before-you-apply/dates-and-deadlines
 
   - id: gates-cambridge
     name: Gates Cambridge Scholarship
-    funds: Any full-time postgraduate degree at Cambridge (LLM, MPhil MLMI, ACS…)
-    value: Full — fees + ~£21k stipend + airfares
-    eligibility: Non-UK citizens incl. Australians; no age limit. Extremely competitive but a genuine fit.
-    opens: September 2026
+    category: other
+    sub: Full ride
+    blurb: >
+      Full ride (fees + ~£21k stipend + airfares) for any full-time Cambridge
+      postgraduate degree, no age limit — pairs with the Cambridge LLM.
+      Extremely competitive but a genuine fit for Australians.
+    prepare: Tick the Gates box in your Cambridge course application and add the Gates statement — one application, same deadline.
     deadline: "2026-12-08"
-    deadlineNote: Confirmed 2027-28 entry, international round — actual date is your course's Cambridge funding deadline (early Dec 2026 or early Jan 2027).
+    deadlineNote: International round for 2027-28; actual date is your course's funding deadline (early Dec / early Jan).
     url: https://www.gatescambridge.org/apply/timeline/
-
-  - id: cambridge-trust
-    name: Cambridge Trust Scholarships (incl. Cambridge International)
-    funds: Masters and PhD across Cambridge — partial to full awards
-    value: Partial fee awards up to full cost
-    eligibility: International students incl. Australians — automatic consideration via the Cambridge course application, no separate form.
-    opens: September 2026
-    deadline: "2026-12-02"
-    deadlineNote: Apply via Cambridge admissions by the course funding deadline (early Dec 2026 / early Jan 2027); exact 2027 dates publish ~Sept 2026.
-    url: https://www.cambridgetrust.org/scholarship/cambridge-international-scholarship/
-
-  - id: cambridge-australia
-    name: Cambridge Australia Scholarships
-    funds: Masters (partial, co-funded with Cambridge Trust) and PhD at Cambridge — Australians only
-    value: Masters partial; PhD full cost
-    eligibility: Australian citizens/residents — automatic pipeline once you apply to Cambridge by the funding deadline.
-    opens: September 2026
-    deadline: "2026-12-02"
-    deadlineNote: No direct application — apply via Cambridge Graduate Admissions by the course funding deadline.
-    url: https://www.cambridgeaustralia.org.au/how-to-apply
 
   - id: clarendon
     name: Clarendon Fund (Oxford)
-    funds: Any Oxford masters or DPhil, all subjects — ~200+ awards/yr
-    value: Full — course fees + ~£20k living grant
-    eligibility: All nationalities, no age limit, purely academic merit — automatic consideration with your Oxford course application.
-    opens: September 2026
+    category: other
+    sub: Full ride
+    blurb: >
+      ~200 full awards a year (fees + ~£20k living grant) across all Oxford
+      subjects, purely on academic merit with no age limit — automatic
+      consideration, no separate application.
+    prepare: "Nothing extra — just submit your Oxford course application (BCL: late Jan) by its deadline."
     deadline: "2027-01-08"
-    deadlineNote: No separate application — submit the Oxford course application by its Dec 2026 / Jan 2027 deadline (BCL is late January).
+    deadlineNote: Deadline is your course's Dec 2026 / Jan 2027 deadline; BCL is late January.
     url: https://www.ox.ac.uk/clarendon
 
-  - id: rg-menzies-harvard
-    name: R.G. Menzies Scholarship to Harvard
-    funds: Any Harvard graduate school (HLS LLM, HKS, HBS, SEAS)
-    value: Up to US$60k (1-yr degree) / US$120k (2-yr); up to 2/yr
-    eligibility: Australian citizens heading to Harvard with intent to contribute to Australia — excellent fit for a lawyer targeting HLS.
-    opens: ~Nov–Dec 2026
-    deadline: "2027-01-15"
-    deadlineNote: Expected mid-January close based on the latest known cycle — check the ANU scholarships page from ~Nov 2026.
-    url: https://study.anu.edu.au/scholarships/find-scholarship/rg-menzies-scholarship-harvard
+  - id: cambridge-trust
+    name: Cambridge Trust + Cambridge Australia Scholarships
+    category: other
+    sub: Study funding
+    blurb: >
+      Partial-to-full Cambridge funding for internationals, plus the
+      Australians-only Cambridge Australia awards — both considered
+      automatically from your Cambridge course application.
+    prepare: Nothing extra — apply to Cambridge by the course funding deadline (early Dec).
+    deadline: "2026-12-02"
+    deadlineNote: Course funding deadline; exact 2027 dates publish ~Sept 2026.
+    url: https://www.cambridgetrust.org/scholarship/cambridge-international-scholarship/
 
   - id: frank-knox
     name: Frank Knox Memorial Fellowship (Harvard)
-    funds: Graduate study at Harvard for citizens of Australia, Canada, NZ, UK
-    value: Substantial — tuition + health fees + living stipend ~10 months
-    eligibility: Australian citizens applying to Harvard; no tight age limit — very strong fit alongside R.G. Menzies.
-    opens: ~Oct–Nov 2026
+    category: other
+    sub: AU → Harvard
+    blurb: >
+      Substantial Harvard funding (tuition + stipend) reserved for citizens of
+      Australia, Canada, NZ and the UK, with no tight age limit — a much smaller
+      pool than the global scholarships.
+    prepare: Separate Knox application (essays + references) alongside your Harvard application, due ~early Feb.
     deadline: "2027-02-10"
-    deadlineNote: Expected (2026-27 round closed 10 Feb 2026); ~early Feb 2027 for AY2027-28.
+    deadlineNote: Expected (2026-27 round closed 10 Feb 2026).
     url: https://frankknox.harvard.edu/australia
 
-  - id: oxford-australia-fund
-    name: Oxford Australia Scholarship Fund (James Fairfax)
-    funds: Postgraduate study at Oxford for Australians
-    value: Partial top-up (~A$15–40k historically) — stacks with Clarendon shortfall
-    eligibility: Australian citizens/PR heading to Oxford.
-    opens: ~January 2027
-    deadline: "2027-02-23"
-    deadlineNote: Expected (2026 round ran 5 Jan – 23 Feb); similar Jan–Feb 2027 window likely for 2027-28 entry.
-    url: https://oxfordaustraliascholarships.anu.edu.au/applications
+  - id: rg-menzies-harvard
+    name: R.G. Menzies Scholarship to Harvard
+    category: other
+    sub: AU → Harvard
+    blurb: >
+      Up to US$60k (one-year degree) for Australians heading to any Harvard
+      school with intent to contribute to Australia — excellent fit for an HLS
+      LLM, and stackable with Frank Knox and need-based aid.
+    prepare: Application via ANU (CV, essays, Harvard application evidence) — round advertised ~Nov–Dec.
+    deadline: "2027-01-15"
+    deadlineNote: Expected mid-January close; check the ANU page from ~Nov 2026 — watched.
+    url: https://study.anu.edu.au/scholarships/find-scholarship/rg-menzies-scholarship-harvard
 
-  - id: ramsay-postgrad
-    name: Ramsay Postgraduate Scholarships
-    funds: Postgraduate study at world-leading overseas universities (Oxford, Cambridge, Harvard…)
-    value: Up to A$100,000 p.a.
-    eligibility: Australian citizens/PR; study must connect to Western-civilisation/humanities themes — an AI-ethics or law+tech-governance framing can work, pure data science won't.
-    opens: ~February 2027
-    deadline: "2027-03-23"
-    deadlineNote: Expected (2026 round closed 23 Mar 2026); 2027 dates TBC — confirm which start years the round funds.
-    url: https://ramsaypostgradscholarship.com/application-process/
-
-  - id: schwarzman
-    name: Schwarzman Scholars (Tsinghua, Beijing)
-    funds: Fully funded 1-year Master of Global Affairs — tech/AI-governance track possible
-    value: Full — tuition, room/board, travel, stipend
-    eligibility: Any nationality but must be 18–28 at enrolment — age cap likely excludes a mid-career lawyer.
-    opens: "2026-04-08"
-    deadline: "2026-09-09"
-    deadlineNote: Confirmed global-round deadline for the 2027-28 class.
-    url: https://www.schwarzmanscholars.org/admissions/
-
-  - id: anthropic-fellows
-    name: Anthropic Fellows Program
-    funds: Not a degree — funded 4-month (extendable) AI safety research fellowship with mentorship
-    value: US$3,850/week stipend + compute budget
-    eligibility: Open internationally; no ML background required — designed for career-switchers with strong analytical ability. A viable pivot route without a masters.
-    opens: Rolling — cohorts from late Sept 2026
-    deadline: null
-    deadlineNote: Applications reviewed on a rolling basis for future cohorts.
-    url: https://alignment.anthropic.com/2025/anthropic-fellows-program-2026/
-
-  - id: cooperative-ai-phd
-    name: Cooperative AI PhD Fellowship
-    funds: PhD study worldwide on cooperative AI (masters not covered)
-    value: Stipend + research/conference/compute budgets, up to 3 years
-    eligibility: Only relevant if the pivot extends to a PhD; any nationality.
-    opens: ~September 2026
-    deadline: "2026-11-16"
-    deadlineNote: Expected (2026 cohort closed 16 Nov 2025).
-    url: https://www.cooperativeai.com/phd-fellowship/2026
-
-  # ---------- automatic-with-admission school aid ----------
-  - id: hbs-fellowships
-    name: HBS Need-Based Fellowships
-    funds: HBS MBA — awarded after admission, need-based
-    value: ~50% of students receive; average ~US$100k over 2 years
-    eligibility: All nationalities — automatic once admitted; no separate deadline beyond MBA rounds.
-    opens: With MBA application
-    deadline: "2026-09-09"
-    deadlineNote: Gated by MBA R1 (Sep 9 2026) / R2 (Jan 5 2027).
-    url: https://www.hbs.edu/mba/financial-aid
-
-  - id: gsb-fellowships
-    name: Stanford GSB Fellowships
-    funds: Stanford MBA/MSx — need-based
-    value: ~Half of students; average ~US$50k/yr
-    eligibility: All nationalities; need-based; admission is need-blind.
-    opens: With MBA application
-    deadline: "2026-09-09"
-    deadlineNote: Gated by MBA R1 (Sep 9 2026) / R2 (early Jan 2027).
-    url: https://www.gsb.stanford.edu/programs/mba/tuition-financial-aid/types-aid
-
-  - id: wharton-fellowships
-    name: Wharton Fellowship Program
-    funds: Wharton MBA — merit-based, automatic consideration with admission
-    value: Partial to full tuition
-    eligibility: All admitted applicants auto-reviewed — no extra application.
-    opens: With MBA application
-    deadline: "2026-09-08"
-    deadlineNote: Gated by MBA R1 (Sep 8 2026) / R2 (Jan 5 2027).
-    url: https://mba.wharton.upenn.edu/tuition-financial-aid/
-
-  # ---------- closed for 2027 entry — watch for the next round ----------
   - id: john-monash
     name: General Sir John Monash Scholarship
-    funds: Masters or PhD at any world-class university outside Australia, any field
-    value: A$100,000/yr up to 3 years (max A$300k)
-    eligibility: Australian citizens, no age limit, leadership focus — one of the best fits for a mid-career Australian lawyer.
-    opens: May 2027 (2028 round)
+    category: other
+    sub: AU flagship
+    blurb: >
+      A$100k/yr for up to 3 years at any world-class university, any field, no
+      age limit — one of the best fits for a mid-career Australian. Closed for
+      2027 entry; the 2028 round opens ~May 2027.
+    prepare: Build the leadership narrative now — nomination-quality references and a clear Australia-benefit story win this one.
     deadline: null
-    deadlineNote: 2027 round closed 30 Jun 2026 — targets 2028 entry now. The scraper watches for the 2028 round opening (~May 2027, June close).
+    cadence: Annual — opens ~May, closes ~June
+    deadlineNote: 2027 round closed 30 Jun 2026 — the scraper watches for the 2028 round.
     url: https://www.johnmonash.com/scholarship/apply/
 
   - id: fulbright-au
-    name: Fulbright Australia Postgraduate Scholarship (incl. Fulbright Future)
-    funds: Postgraduate study/research at any accredited US university; Future awards favour emerging tech — good AI fit
-    value: Roughly US$40–60k typical; Future awards can approach full funding
-    eligibility: Australian citizens, any career stage — strong fit for a lawyer pivoting to AI policy.
-    opens: ~February 2027 (next round)
+    name: Fulbright Australia (incl. Fulbright Future)
+    category: other
+    sub: AU → US
+    blurb: >
+      Substantial US study funding for Australians at any career stage; the
+      Future Scholarships favour applied/emerging tech, a good AI fit. The
+      2027-28 round closed in July — the next (Feb–Jul 2027) funds 2028 starts.
+    prepare: Prepare the project statement and referee lineup before the February 2027 opening.
     deadline: null
-    deadlineNote: 2027-28 round closed early July 2026. Next round (Feb–Jul 2027) funds 2028 starts — the scraper watches for it opening.
+    cadence: Annual — opens ~Feb, closes ~early July
+    deadlineNote: Watched for the Feb 2027 opening.
     url: https://www.fulbright.org.au/applicants/application-timeline/
 
-  - id: rhodes-australia
-    name: Rhodes Scholarship (Australia)
-    funds: Postgraduate study at Oxford
-    value: Full — all fees + ~£20k stipend + airfares; 9/yr in Australia
-    eligibility: Strict age limit (generally 18–25, up to ~27) — usually rules out established professionals.
-    opens: "2026-06-01"
-    deadline: "2026-08-11"
-    deadlineNote: 2027-entry round closed 11 Aug 2026; listed for completeness given the age cap.
-    url: https://www.rhodeshouse.ox.ac.uk/scholarships/applications/australia/
-
-  - id: chevening
-    name: Chevening Scholarships
-    funds: One-year taught masters at any UK university
-    value: Full — tuition + stipend + travel
-    eligibility: Australian awards run only via the Aurora Education Foundation (Charlie Perkins / Roberta Sykes, for Indigenous Australians) — not a general route for most Australian applicants.
-    opens: "2026-08-04"
-    deadline: "2026-10-06"
-    deadlineNote: Confirmed 2027/28 cycle — 6 Oct 2026, 11:00 UTC.
-    url: https://www.chevening.org/australia/
-
-  - id: westpac-future-leaders
-    name: Westpac Future Leaders Scholarship
-    funds: Postgraduate study at ~10 partner AUSTRALIAN universities only — not usable at Stanford/Harvard/Oxbridge
-    value: Up to A$120,000 over 2–3 years + leadership program
-    eligibility: Australian citizens/PR starting postgrad at a partner Australian uni — relevant only for an in-Australia masters.
-    opens: "2026-06-24"
-    deadline: "2026-08-20"
-    deadlineNote: Confirmed current round (2027 commencement) closes 20 Aug 2026, 5pm AEST — days away.
-    url: https://scholars.westpac.com.au/scholarships/future-leaders-scholarship/
-
-startupSupport:
-  # ---------- Australia ----------
-  - id: startmate
-    name: Startmate Accelerator
-    region: AU
-    location: Sydney / Melbourne
-    offer: A$120k investment + 12-week accelerator — ANZ's flagship program
-    equity: ~7.5%
-    cadence: 2 cohorts/yr; apps ~Oct and ~Apr
-    deadline: "2026-11-03"
-    deadlineNote: Expected — Summer '27 apps likely open Oct 2026 and close early Nov (pattern-based; Summer '26 closed 3 Nov 2025).
-    fit: Best-regarded generalist ANZ accelerator; has backed legal-tech/AI SaaS; strong for a first-time AU founder.
-    url: https://www.startmate.com/accelerator
-
-  - id: antler-au
-    name: Antler Australia
-    region: AU
-    location: Sydney / Melbourne / Brisbane
-    offer: 8–10-week paid residency for pre-idea individuals; co-founder matching; ~A$260k package for teams passing IC
-    equity: ~10–12% for invested teams; residency itself free
-    cadence: 2 residencies/yr (Feb + ~Aug); rolling applications
-    deadline: null
-    deadlineNote: Apply anytime for the next intake.
-    fit: Ideal for a solo lawyer without a technical co-founder — Antler's core product is co-founder matching.
-    url: https://www.antler.co/location/australia
-
-  - id: skalata
-    name: Skalata Ventures
-    region: AU
-    location: Melbourne
-    offer: Up to A$250k staged funding + 6-month seed program; requires full-time founders with some traction
-    equity: Negotiated (staged tranches)
-    cadence: Rolling applications, cohort starts
-    deadline: null
-    deadlineNote: No published 2026-27 deadline; apply via website.
-    fit: Good post-MVP option for an AU legal-tech SaaS with first revenue or pilots.
-    url: https://www.skalata.vc/founders/get-investment
-
-  - id: unsw-founders-10x
-    name: UNSW Founders 10x Accelerator
-    region: AU
-    location: Sydney
-    offer: A$100k via SAFE + 10-week program + 6 months co-working; three streams
-    equity: SAFE (founder-friendly)
-    cadence: Annual; apps ~Feb–May
-    deadline: "2027-05-18"
-    deadlineNote: Expected (2026 apps closed 18 May 2026). All-Industries stream requires a UNSW link (incl. alumni); Health/Climate open to any AU founder.
-    fit: Strong if you have any UNSW affiliation; legal-tech fits the All-Industries stream.
-    url: https://unswfounders.com/10x-accelerator
-
-  - id: map-melbourne
-    name: Melbourne Accelerator Program (MAP)
-    region: AU
-    location: Melbourne
-    offer: A$20k equity-free + desk space + coaching
-    equity: 0% — equity-free
-    cadence: Annual; apps ~Mar–Jun
-    deadline: "2027-06-14"
-    deadlineNote: Expected (2026 apps closed 14 Jun 2026). Eligibility — UniMelb affiliation OR social-impact OR climate startup.
-    fit: Equity-free and legal-tech-friendly if UniMelb-affiliated or access-to-justice framed.
-    url: https://www.themap.co/apply
-
-  - id: csiro-on
-    name: CSIRO ON Accelerate
-    region: AU
-    location: National
-    offer: Free 3-month commercialisation accelerator for research-backed teams; equity-free
-    equity: 0%
-    cadence: Annual
-    deadline: "2026-08-31"
-    deadlineNote: ON Accelerate 11 applications OPEN now, close 31 Aug 2026 — but requires affiliation with a research institution.
-    fit: Only relevant if the startup spins out of university research.
-    url: https://www.csiro.au/en/work-with-us/funding-programs/innovation-programs/on-accelerate
-
-  - id: stone-chalk
-    name: Stone & Chalk
-    region: AU
-    location: Sydney / Melbourne / Adelaide
-    offer: Startup hub residency — subsidised desks, growth programs, mentor/investor network; no funding
-    equity: 0% (paid membership, government-subsidised)
-    cadence: Rolling, by application
-    deadline: null
-    deadlineNote: Apply anytime via the membership page.
-    fit: Cheap base + network for a Sydney/Melbourne legal-tech founder — fintech heritage, strong regtech community.
-    url: https://www.stoneandchalk.com.au/membership
-
-  - id: launchvic
-    name: LaunchVic (CivVic Labs, Alice Anderson Fund)
-    region: AU
-    location: Victoria
-    offer: Victorian govt startup agency — funds 30+ founder programs; CivVic Labs equity-free govt-challenge funding; Alice Anderson co-invests A$50–300k in women-led startups
-    equity: Mostly 0% (grants)
-    cadence: Rolling / varies per program
-    deadline: null
-    deadlineNote: CAUTION — LaunchVic is being merged/restructured by the Victorian government (2026); verify status before relying on it.
-    fit: Gateway to subsidised programs if Victoria-based; CivVic relevant for justice/govt-facing legal-tech.
-    url: https://launchvic.org/founders/
-
-  - id: industry-growth-program
-    name: Industry Growth Program (federal grants)
-    region: AU
-    location: National
-    offer: Grants A$50k–250k (early-stage) and A$100k–5M (growth), matched funding required; free advisory
-    equity: 0% (grant)
-    cadence: Advisory-first pathway, normally rolling
-    deadline: null
-    deadlineNote: Currently PAUSED to new applications (mid-2026). Legal-tech must fit National Reconstruction Fund priorities — "enabling capabilities" (AI) is the plausible hook. The scraper watches for it reopening.
-    fit: Marginal fit for legal-tech; worth watching for the AI angle.
-    url: https://business.gov.au/grants-and-programs/industry-growth-program
-
-  # ---------- USA ----------
-  - id: y-combinator
-    name: Y Combinator
-    region: US
-    location: San Francisco
-    offer: US$500k (US$125k for 7% + US$375k uncapped MFN SAFE) + 3-month batch
-    equity: 7% + MFN SAFE
-    cadence: 4 batches/yr; deadlines ~Nov / Feb / May / Aug
-    deadline: "2026-11-10"
-    deadlineNote: Expected Winter 2027 deadline (~10–12 Nov 2026, unannounced); Fall 2026 closed early Aug. Late applications accepted with reduced odds. Requires SF relocation for the batch.
-    fit: Top choice for AI legal-tech — YC has funded Casetext, Lexion and much of the current legal-AI cohort.
-    url: https://www.ycombinator.com/apply
-
-  - id: a16z-speedrun
-    name: a16z speedrun
-    region: US
-    location: San Francisco
-    offer: Up to US$1M investment + 12-week program (~60 companies/cohort)
-    equity: Negotiated (typically ~7–10% implied)
-    cadence: 2 cohorts/yr
-    deadline: "2026-09-28"
-    deadlineNote: Expected SR008 close (~late Sep 2026, pattern-based) — likely open or opening now.
-    fit: Originally games/consumer, now broad AI — welcomes application-layer AI incl. vertical SaaS.
-    url: https://speedrun.a16z.com/apply
-
-  - id: techstars
-    name: Techstars (~45 programs incl. Anywhere/remote)
-    region: US
-    location: Various + remote
-    offer: US$220k investment + 13-week mentorship-driven accelerator
-    equity: ~5–9%
-    cadence: 2 cycles/yr per program
-    deadline: "2026-11-19"
-    deadlineNote: Expected Spring 2027 close (~mid-Nov 2026, pattern-based). Note — Techstars Tech Central Sydney was defunded and is no longer running.
-    fit: Broad fit; pick an AI/fintech-flavoured program; Anywhere avoids relocation.
-    url: https://apply.techstars.com/
-
-  - id: pearx
-    name: PearX (Pear VC)
-    region: US
-    location: SF Bay Area
-    offer: US$250k–2M pre-seed + 12-week program (~20 teams) + $1M+ cloud credits
-    equity: Negotiated pre-seed terms
-    cadence: 2 cohorts/yr
-    deadline: "2026-10-12"
-    deadlineNote: Expected — W27 applications likely open Sept–Oct 2026 (pattern-based).
-    fit: Strong for B2B SaaS/AI; Pear has enterprise-AI depth relevant to legal workflow tools.
-    url: https://pear.vc/pearx-application/
-
-  - id: south-park-commons
-    name: South Park Commons Founder Fellowship
-    region: US
-    location: SF / NYC
-    offer: US$1M total (US$400k upfront + US$600k next round) + 8-week bootcamp; idea not required
-    equity: 7%
-    cadence: 2 cohorts/yr (Spring + Fall)
-    deadline: "2027-01-15"
-    deadlineNote: Expected Spring 2027 window (~Dec 2026–Jan 2027); Fall 2026 closed 2 Aug.
-    fit: Excellent for the "-1 to 0" phase — a lawyer exploring AI startup ideas before committing to one.
-    url: https://www.southparkcommons.com/apply
-
-  - id: neo-accelerator
-    name: Neo Accelerator / Residency
-    region: US
-    location: San Francisco
-    offer: ~US$600k uncapped SAFE ($10M floor); ~20 technical teams; 3-month program
-    equity: ~1–5% effective
-    cadence: Annual cohort; apps ~Oct–Feb
-    deadline: null
-    deadlineNote: No standing deadline — check the page ~Oct 2026 for the 2027 cohort.
-    fit: Aimed at exceptional technical founders — needs a strong technical co-founder to be competitive.
-    url: https://neo.com/accelerator
-
-  - id: hf0
-    name: HF0 Residency
-    region: US
-    location: San Francisco
-    offer: 12-week live-in residency (housing + meals) + up to US$1M uncapped SAFE
-    equity: 5%
-    cadence: Rolling, multiple cohorts/yr
-    deadline: null
-    deadlineNote: Rolling; extreme selectivity (<0.1%), geared to repeat/highly technical founders.
-    fit: Poor fit for a first-time non-technical founder; exceptional with a serial-founder technical partner.
-    url: https://www.hf0.com/apply
-
-  - id: 500-global
-    name: 500 Global Flagship Accelerator
-    region: US
-    location: Palo Alto
-    offer: US$150k for 6% (US$37.5k program fee deducted) + 4-month program
-    equity: 6%
-    cadence: ~2 batches/yr; rolling review
-    deadline: null
-    deadlineNote: No fixed public deadline — apply anytime.
-    fit: Global-founder-friendly (visa support); solid but less prestigious than YC for AI startups.
-    url: https://500.co/founders/flagship
-
-  - id: ai2-incubator
-    name: AI2 Incubator (AI House)
-    region: US
-    location: Seattle
-    offer: Up to US$600k on SAFE ($10M cap), staged; applied-AI incubation + community
-    equity: 7% common + SAFE
-    cadence: Rolling — no batches
-    deadline: null
-    deadlineNote: Apply anytime; rebranded AI House June 2026.
-    fit: Genuine applied-AI focus with hands-on technical help — useful for a domain-expert founder needing AI muscle.
-    url: https://www.ai2incubator.com/
-
-  - id: tr-ventures
-    name: Thomson Reuters Ventures
-    region: US
-    location: Global (US-based fund)
-    offer: US$150M corporate VC fund — seed to Series B in legal/tax/risk tech; pilots + distribution via Westlaw ecosystem
-    equity: VC terms per round
-    cadence: Rolling — pitch anytime
-    deadline: null
-    deadlineNote: Not a day-one incubator; approach once you have a product.
-    fit: Highly relevant later-stage channel for legal-tech distribution.
-    url: https://ventures.thomsonreuters.com/
-
-  # ---------- Rest of world ----------
-  - id: entrepreneur-first
-    name: Entrepreneur First
-    region: World
-    location: London / Paris / Bangalore / SF
-    offer: Talent-first team formation — stipend during Form phase, then up to ~US$250k at company formation + follow-on
-    equity: ~8–10% at investment
-    cadence: 2 cohorts/yr per site
+  - id: horizon-fellowship
+    name: Horizon Fellowship (US AI policy)
+    category: other
+    sub: AI policy
+    blurb: >
+      Funded placements (up to US$190k salary support) in US federal agencies,
+      Congress and think tanks working on AI policy — a strong pivot route
+      without a degree. Some placements require US work authorisation.
+    prepare: Application closes Aug 30 — CV, essays, and check the work-authorisation constraints as an Australian first.
     deadline: "2026-08-30"
-    deadlineNote: SF Bridge Residency Fall '26 closes 30 Aug 2026; London Fall '26 closed 4 Aug. Spring 2027 apps expected ~Nov 2026–Jan 2027. Apply as an individual — no idea or team needed.
-    fit: Excellent for a lawyer without a co-founder — EF exists to match domain experts with technical founders.
-    url: https://apply.joinef.com/
+    deadlineNote: Confirmed 2027-cohort deadline, 11:59pm AoE.
+    url: https://horizonpublicservice.org/programs/become-a-fellow/
 
-  - id: antler-global
-    name: Antler (Global)
-    region: World
-    location: 30+ cities
-    offer: Residencies with co-founder matching + pre-seed (~US$100–250k, varies by geography)
-    equity: ~9–12%
-    cadence: Rolling; 2+ residencies/yr per city
+  - id: anthropic-fellows
+    name: Anthropic Fellows Program
+    category: other
+    sub: AI fellowship
+    blurb: >
+      Funded 4-month (extendable) AI-safety research fellowship — US$3,850/week
+      stipend plus compute, designed for career-switchers with strong analytical
+      ability, no ML background required. A pivot route without a masters.
+    prepare: Application with evidence of strong analytical/technical work; cohorts reviewed rolling.
     deadline: null
-    deadlineNote: Choose a location on the apply page; Australia covered separately above.
-    fit: Same co-founder-matching value as Antler AU with global optionality.
-    url: https://www.antler.co/apply
+    cadence: Rolling cohorts from late Sept 2026
+    deadlineNote: Reviewed on a rolling basis.
+    url: https://alignment.anthropic.com/2025/anthropic-fellows-program-2026/
+    watch: false
 
-  - id: lawtechuk
-    name: LawtechUK (incl. Summer Sprint)
-    region: World
-    location: UK
-    offer: UK Ministry of Justice-backed free founder programs, regulatory sandbox guidance, Legal Geek showcase; no funding, no equity
-    equity: 0%
-    cadence: Program-by-program windows
-    deadline: "2026-10-31"
-    deadlineNote: Current funded phase ends 31 Oct 2026 — the scraper watches for continuation news.
-    fit: THE dedicated lawtech ecosystem program — directly relevant even for an AU founder eyeing the UK market.
-    url: https://lawtechuk.io/
-
-  - id: creative-destruction-lab
-    name: Creative Destruction Lab (CDL)
-    region: World
-    location: Toronto + 16 global sites
-    offer: 9-month objectives-based mentorship, AI stream; equity-free to participate, investment negotiated separately
-    equity: 0% to participate
-    cadence: Annual; main deadline ~July
-    deadline: null
-    deadlineNote: 2026/27 main deadline (24 Jul 2026) passed; 2027/28 apps expected ~spring 2027 — watched.
-    fit: Good for AI-heavy ventures; equity-free is attractive.
-    url: https://creativedestructionlab.com/apply/
-
-  - id: seedcamp
-    name: Seedcamp
-    region: World
-    location: Europe (London)
-    offer: Europe's first-cheque pre-seed VC — ~€475k typical first cheque + lifelong platform
-    equity: ~7–10%
-    cadence: Rolling, year-round
-    deadline: null
-    deadlineNote: No application windows — pitch anytime; warm intro helps.
-    fit: Relevant only if incorporating/operating in Europe; strong B2B SaaS track record.
-    url: https://seedcamp.com/
-
-  - id: station-f
-    name: Station F — Founders Program
-    region: World
-    location: Paris
-    offer: World's largest startup campus — up to 18 months residency, ~€195/desk/month, 30+ partner programs
-    equity: 0% for Founders Program
-    cadence: ~2 application rounds/yr
-    deadline: null
-    deadlineNote: Current round closed mid-2026 — next round historically opens ~every 6 months; watched.
-    fit: Only if an EU base appeals; equity-free and cheap, legal-tech corporates on campus.
-    url: https://stationf.co/programs/founders-program
-
-  - id: founders-factory
-    name: Founders Factory
-    region: World
-    location: London + global
-    offer: Corporate-backed accelerator (£30–250k for ~7%) + venture studio (~£150k for ~25%, co-built)
-    equity: ~7% accelerator / ~25% studio
-    cadence: Rolling, per sector track
-    deadline: null
-    deadlineNote: Eligibility depends on which corporate-partner track is open.
-    fit: Fintech/insurance tracks adjoin regtech; the studio route suits a non-technical founder but is expensive in equity.
-    url: https://foundersfactory.com/
+  - id: rd-tax-incentive
+    name: Australian R&D Tax Incentive
+    category: other
+    sub: AU tax
+    blurb: >
+      43.5% refundable tax offset on eligible R&D for companies under A$20M
+      turnover — effectively the government co-funding TerraCheck's build. From
+      your notes; registration is due 10 months after year-end, strictly.
+    prepare: Incorporate, keep contemporaneous records of experimental R&D activities, and register via the business.gov.au portal.
+    deadline: "2027-04-30"
+    deadlineNote: For a standard 30 June 2026 year-end; no extensions.
+    url: https://business.gov.au/grants-and-programs/research-and-development-tax-incentive

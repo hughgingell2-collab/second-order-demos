@@ -1,0 +1,6 @@
+# Your application record — updated by scout/feedback.py (via scout-feedback
+# issues) or by hand. 'applied' shows a badge; 'notInterested' hides the
+# opportunity from alert emails and dims it on the dashboard.
+applied:
+- antler-au
+notInterested: []

@@ -2,8 +2,13 @@
 (function () {
   "use strict";
 
-  var DATA = window.SCOUT_DATA || { programs: [], scholarships: [], startupSupport: [], scrapeState: {} };
+  var DATA = window.SCOUT_DATA || { categories: [], opportunities: [], status: {}, scrapeState: {} };
   var STATE = DATA.scrapeState || {};
+  var APPLIED = {};
+  var HIDDEN = {};
+  ((DATA.status || {}).applied || []).forEach(function (id) { APPLIED[id] = true; });
+  ((DATA.status || {}).notInterested || []).forEach(function (id) { HIDDEN[id] = true; });
+  var REPO = DATA.repo || "hughgingell2-collab/second-order-demos";
   var TODAY = new Date();
   TODAY.setHours(0, 0, 0, 0);
   var CHANGED_WINDOW_DAYS = 21;
@@ -24,31 +29,12 @@
     else root.removeAttribute("data-theme");
   }
 
-  /* ---------- tabs ---------- */
-  var TABS = ["study", "scholarships", "startups", "about"];
-  var tabButtons = Array.prototype.slice.call(document.querySelectorAll("nav.tabs button"));
-  function showTab(id, push) {
-    if (TABS.indexOf(id) === -1) id = TABS[0];
-    tabButtons.forEach(function (btn) {
-      var active = btn.dataset.tab === id;
-      btn.setAttribute("aria-selected", active ? "true" : "false");
-    });
-    TABS.forEach(function (t) {
-      document.getElementById("panel-" + t).hidden = t !== id;
-    });
-    if (push !== false) {
-      try { history.replaceState(null, "", "#" + id); } catch (e) { location.hash = id; }
-    }
-  }
-  tabButtons.forEach(function (btn) {
-    btn.addEventListener("click", function () { showTab(btn.dataset.tab); });
-  });
-  window.addEventListener("hashchange", function () {
-    showTab((location.hash || "#study").slice(1), false);
-  });
-  showTab((location.hash || "#study").slice(1), false);
-
   /* ---------- helpers ---------- */
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
   function daysUntil(iso) {
     if (!iso) return null;
     var d = new Date(iso + "T00:00:00");
@@ -63,7 +49,7 @@
   }
   function deadlineBadge(item) {
     var days = daysUntil(item.deadline);
-    if (days === null) return { cls: "rolling", label: item.cadence ? "Rolling / batch" : "See page" };
+    if (days === null) return { cls: "rolling", label: item.cadence ? "Rolling / recurring" : "See page" };
     if (days < 0) return { cls: "closed", label: "Closed — next cycle" };
     if (days <= 30) return { cls: "due-soon", label: days + "d left" };
     if (days <= 90) return { cls: "due-mid", label: days + "d left" };
@@ -73,17 +59,14 @@
     var st = STATE[id];
     if (!st || !st.changedAt) return false;
     var d = new Date(st.changedAt);
-    if (isNaN(d)) return false;
-    return (TODAY - d) / 86400000 <= CHANGED_WINDOW_DAYS;
+    return !isNaN(d) && (TODAY - d) / 86400000 <= CHANGED_WINDOW_DAYS;
   }
-  function esc(s) {
-    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
-    });
-  }
-  function badgeHtml(item) {
+  function statusBadges(item) {
+    var html = "";
+    if (APPLIED[item.id]) html += '<span class="badge applied">applied ✓</span> ';
+    if (HIDDEN[item.id]) html += '<span class="badge closed">hidden</span> ';
     var b = deadlineBadge(item);
-    var html = '<span class="badge ' + b.cls + '">' + esc(b.label) + "</span>";
+    html += '<span class="badge ' + b.cls + '">' + esc(b.label) + "</span>";
     if (recentlyChanged(item.id)) html += ' <span class="badge changed">page changed</span>';
     var st = STATE[item.id];
     if (st && st.error) html += ' <span class="badge error" title="' + esc(st.error) + '">fetch error</span>';
@@ -91,91 +74,146 @@
   }
   function sortValDeadline(item) {
     var days = daysUntil(item.deadline);
-    if (days === null) return 99998;      // rolling — after dated, before closed
-    if (days < 0) return 99999;           // closed last
+    if (days === null) return 99998;
+    if (days < 0) return 99999;
     return days;
   }
+  function feedbackLink(id, action) {
+    var label = action === "applied" ? "I applied to this" : "Not interested / hide this";
+    var params = new URLSearchParams({
+      title: "scout: " + action + " " + id,
+      body: label + ": `" + id + "`.\n\nJust press **Submit new issue** — the feedback bot will record it, update the dashboard, and close this issue automatically.",
+      labels: "scout-feedback"
+    });
+    return "https://github.com/" + REPO + "/issues/new?" + params.toString();
+  }
 
-  /* ---------- generic table section ---------- */
-  function makeSection(cfg) {
-    var panel = document.getElementById("panel-" + cfg.tab);
-    var controls = panel.querySelector(".controls");
+  /* ---------- tabs (one per category + about) ---------- */
+  var CATS = DATA.categories.map(function (c) { return c.key; });
+  var TABS = CATS.concat(["about"]);
+  var tabsNav = document.querySelector("nav.tabs");
+  DATA.categories.forEach(function (c) {
+    var btn = document.createElement("button");
+    btn.dataset.tab = c.key;
+    btn.setAttribute("aria-selected", "false");
+    btn.textContent = c.tab || c.label;
+    tabsNav.insertBefore(btn, tabsNav.querySelector('button[data-tab="about"]'));
+  });
+  var tabButtons = Array.prototype.slice.call(tabsNav.querySelectorAll("button"));
+  function showTab(id, push) {
+    if (TABS.indexOf(id) === -1) id = TABS[0];
+    tabButtons.forEach(function (btn) {
+      btn.setAttribute("aria-selected", btn.dataset.tab === id ? "true" : "false");
+    });
+    TABS.forEach(function (t) {
+      var panel = document.getElementById("panel-" + t);
+      if (panel) panel.hidden = t !== id;
+    });
+    if (push !== false) {
+      try { history.replaceState(null, "", "#" + id); } catch (e) { location.hash = id; }
+    }
+  }
+  tabsNav.addEventListener("click", function (ev) {
+    var btn = ev.target.closest("button");
+    if (btn) showTab(btn.dataset.tab);
+  });
+  window.addEventListener("hashchange", function () {
+    showTab((location.hash || "#" + TABS[0]).slice(1), false);
+  });
+
+  /* ---------- category panels ---------- */
+  var main = document.querySelector("main");
+  var aboutPanel = document.getElementById("panel-about");
+  var genDate = DATA.generated ? DATA.generated.slice(0, 10) : null;
+  var freshText = genDate
+    ? "Catalog last regenerated " + genDate + " · scraper runs weekly (Tuesday morning AEST) and opens a GitHub issue — with I-applied / not-interested buttons — when a watched page changes."
+    : "Scraper has not run yet.";
+
+  DATA.categories.forEach(function (cat) {
+    var rows = DATA.opportunities.filter(function (o) { return o.category === cat.key; });
+    var section = document.createElement("section");
+    section.id = "panel-" + cat.key;
+    section.setAttribute("role", "tabpanel");
+    section.setAttribute("aria-label", cat.label);
+    section.hidden = true;
+    section.innerHTML =
+      '<div class="section-intro"><h1>' + esc(cat.label) + "</h1>" +
+      "<p>" + esc(cat.intro || "") + "</p>" +
+      '<p class="freshness">' + esc(freshText) + "</p></div>" +
+      '<div class="controls">' +
+      '<input type="search" placeholder="Search…" aria-label="Search ' + esc(cat.label) + '">' +
+      '<label class="hide-toggle"><input type="checkbox" class="show-hidden"> show hidden</label>' +
+      '<button class="reset-link" hidden>Reset</button>' +
+      '<span class="count"></span></div>' +
+      '<div class="table-wrap"><table><thead><tr>' +
+      '<th scope="col"><button data-key="name">Opportunity<span class="arrow"></span></button></th>' +
+      '<th scope="col"><button data-key="prepare">Prepare<span class="arrow"></span></button></th>' +
+      '<th scope="col" class="num"><button data-key="deadline">Deadline<span class="arrow"></span></button></th>' +
+      "</tr></thead><tbody></tbody></table></div>" +
+      '<div class="empty" hidden>No results — <button>reset</button></div>';
+    main.insertBefore(section, aboutPanel);
+    wireSection(section, rows);
+  });
+
+  function wireSection(panel, rows) {
     var tbody = panel.querySelector("tbody");
     var tableWrap = panel.querySelector(".table-wrap");
     var emptyBox = panel.querySelector(".empty");
     var countEl = panel.querySelector(".count");
     var headers = Array.prototype.slice.call(panel.querySelectorAll("thead th button"));
     var searchEl = panel.querySelector('input[type="search"]');
-    var selects = Array.prototype.slice.call(controls.querySelectorAll("select"));
+    var showHiddenEl = panel.querySelector(".show-hidden");
     var resetBtn = panel.querySelector(".reset-link");
-    var sort = { key: cfg.defaultSort, dir: 1 };
+    var sort = { key: "deadline", dir: 1 };
+    var sortVals = {
+      name: function (r) { return r.name.toLowerCase(); },
+      prepare: function (r) { return (r.prepare || "").toLowerCase(); },
+      deadline: sortValDeadline
+    };
 
-    // Populate filter dropdowns from the data itself so catalog edits need no HTML change.
-    selects.forEach(function (sel) {
-      var key = sel.dataset.filter;
-      var labels = cfg.optionLabels && cfg.optionLabels[key];
-      var seen = [];
-      cfg.rows.forEach(function (r) {
-        var v = r[key];
-        if (v != null && seen.indexOf(v) === -1) seen.push(v);
-      });
-      seen.sort();
-      seen.forEach(function (v) {
-        var opt = document.createElement("option");
-        opt.value = v;
-        opt.textContent = (labels && labels[v]) || v;
-        sel.appendChild(opt);
-      });
-    });
-
-    function activeRows() {
-      var q = (searchEl && searchEl.value || "").trim().toLowerCase();
-      return cfg.rows.filter(function (r) {
-        for (var i = 0; i < selects.length; i++) {
-          var sel = selects[i], v = sel.value;
-          if (v !== "all" && String(cfg.filterVal(r, sel.dataset.filter)) !== v) return false;
-        }
-        if (q && cfg.searchText(r).toLowerCase().indexOf(q) === -1) return false;
+    function render() {
+      var q = (searchEl.value || "").trim().toLowerCase();
+      var shown = rows.filter(function (r) {
+        if (HIDDEN[r.id] && !showHiddenEl.checked) return false;
+        if (q && [r.name, r.blurb, r.prepare, r.sub].join(" ").toLowerCase().indexOf(q) === -1) return false;
         return true;
       });
-    }
-    function render() {
-      var rows = activeRows();
-      var col = cfg.columns.filter(function (c) { return c.key === sort.key; })[0] || cfg.columns[0];
-      rows = rows.slice().sort(function (a, b) {
-        var va = col.sortVal(a), vb = col.sortVal(b);
-        if (va < vb) return -1 * sort.dir;
-        if (va > vb) return 1 * sort.dir;
-        return 0;
+      var sv = sortVals[sort.key] || sortVals.deadline;
+      shown = shown.slice().sort(function (a, b) {
+        var va = sv(a), vb = sv(b);
+        return va < vb ? -sort.dir : va > vb ? sort.dir : 0;
       });
       headers.forEach(function (h) {
-        var th = h.parentElement;
-        var arrow = h.querySelector(".arrow");
+        var th = h.parentElement, arrow = h.querySelector(".arrow");
         if (h.dataset.key === sort.key) {
           th.setAttribute("aria-sort", sort.dir === 1 ? "ascending" : "descending");
           arrow.textContent = sort.dir === 1 ? "▲" : "▼";
-        } else {
-          th.removeAttribute("aria-sort");
-          arrow.textContent = "";
-        }
+        } else { th.removeAttribute("aria-sort"); arrow.textContent = ""; }
       });
-      tbody.innerHTML = rows.map(cfg.rowHtml).join("");
+      tbody.innerHTML = shown.map(function (r) {
+        return '<tr data-id="' + esc(r.id) + '"' + (HIDDEN[r.id] ? ' class="dimmed"' : "") + ">" +
+          '<td><div class="cell-main">' + esc(r.name) +
+          (r.sub ? ' <span class="badge cat">' + esc(r.sub) + "</span>" : "") +
+          '</div><div class="cell-sub">' + esc(r.blurb || "") + "</div></td>" +
+          '<td class="prep">' + esc(r.prepare || "—") + "</td>" +
+          '<td class="num"><div>' + esc(r.deadline ? fmtDate(r.deadline) : (r.cadence || "—")) +
+          "</div><div>" + statusBadges(r) + "</div></td></tr>";
+      }).join("");
       Array.prototype.slice.call(tbody.querySelectorAll("tr")).forEach(function (tr) {
         tr.tabIndex = 0;
         function open() {
-          var item = cfg.rows.filter(function (r) { return r.id === tr.dataset.id; })[0];
-          if (item) openDetail(item, cfg);
+          var item = rows.filter(function (r) { return r.id === tr.dataset.id; })[0];
+          if (item) openDetail(item);
         }
         tr.addEventListener("click", open);
         tr.addEventListener("keydown", function (ev) {
           if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); open(); }
         });
       });
-      var anyFilter = selects.some(function (s) { return s.value !== "all"; }) || (searchEl && searchEl.value);
-      resetBtn.hidden = !anyFilter;
-      tableWrap.hidden = rows.length === 0;
-      emptyBox.hidden = rows.length !== 0;
-      countEl.textContent = rows.length + " of " + cfg.rows.length + " shown";
+      resetBtn.hidden = !q && !showHiddenEl.checked;
+      tableWrap.hidden = shown.length === 0;
+      emptyBox.hidden = shown.length !== 0;
+      countEl.textContent = shown.length + " of " + rows.length + " shown";
     }
     headers.forEach(function (h) {
       h.addEventListener("click", function () {
@@ -184,13 +222,9 @@
         render();
       });
     });
-    selects.forEach(function (s) { s.addEventListener("change", render); });
-    if (searchEl) searchEl.addEventListener("input", render);
-    function reset() {
-      selects.forEach(function (s) { s.value = "all"; });
-      if (searchEl) searchEl.value = "";
-      render();
-    }
+    searchEl.addEventListener("input", render);
+    showHiddenEl.addEventListener("change", render);
+    function reset() { searchEl.value = ""; showHiddenEl.checked = false; render(); }
     resetBtn.addEventListener("click", reset);
     emptyBox.querySelector("button").addEventListener("click", reset);
     render();
@@ -200,28 +234,32 @@
   var overlay = document.getElementById("overlay");
   var slideover = document.getElementById("slideover");
   var lastFocus = null;
-  function openDetail(item, cfg) {
+  function openDetail(item) {
     lastFocus = document.activeElement;
     var st = STATE[item.id] || {};
-    var pairs = cfg.detailPairs(item);
     var html = '<button class="close" aria-label="Close details">×</button>';
-    html += "<h2>" + esc(cfg.detailTitle(item)) + "</h2>";
-    html += '<p class="sub">' + esc(cfg.detailSub(item)) + "</p>";
-    html += "<p>" + badgeHtml(item) + "</p>";
+    html += "<h2>" + esc(item.name) + "</h2>";
+    if (item.sub) html += '<p class="sub">' + esc(item.sub) + "</p>";
+    html += "<p>" + statusBadges(item) + "</p>";
+    if (item.blurb) html += '<p class="detail-blurb">' + esc(item.blurb) + "</p>";
+    if (item.prepare) html += '<p class="detail-blurb"><strong>Prepare:</strong> ' + esc(item.prepare) + "</p>";
     html += "<dl>";
-    pairs.forEach(function (p) {
+    [["Deadline", item.deadline ? fmtDate(item.deadline) : null],
+     ["Cadence", item.cadence],
+     ["Notes", item.deadlineNote]].forEach(function (p) {
       if (p[1]) html += "<dt>" + esc(p[0]) + "</dt><dd>" + esc(p[1]) + "</dd>";
     });
     html += "</dl>";
     if (item.url) {
       html += '<a class="apply-btn" href="' + esc(item.url) + '" target="_blank" rel="noopener">Open official page ↗</a>';
     }
+    html += '<div class="feedback-row">' +
+      '<a href="' + esc(feedbackLink(item.id, "applied")) + '" target="_blank" rel="noopener">✅ I applied</a>' +
+      '<a href="' + esc(feedbackLink(item.id, "hide")) + '" target="_blank" rel="noopener">🚫 Not interested</a></div>';
     html += '<div class="scrape-box">';
     if (st.lastChecked) {
       html += "<strong>Scraper status</strong><br>Last checked: " + esc(st.lastChecked.slice(0, 10));
-      if (st.dates && st.dates.length) {
-        html += "<br>Dates spotted on page: " + st.dates.map(fmtDate).map(esc).join(", ");
-      }
+      if (st.dates && st.dates.length) html += "<br>Dates spotted on page: " + st.dates.map(fmtDate).map(esc).join(", ");
       if (st.changedAt) html += "<br>Last change detected: " + esc(st.changedAt.slice(0, 10));
       if (st.error) html += "<br>Last fetch error: " + esc(st.error);
     } else {
@@ -255,119 +293,5 @@
     else if (!ev.shiftKey && document.activeElement === last) { ev.preventDefault(); first.focus(); }
   }
 
-  /* ---------- freshness lines ---------- */
-  var genDate = DATA.generated ? DATA.generated.slice(0, 10) : null;
-  Array.prototype.slice.call(document.querySelectorAll(".freshness")).forEach(function (el) {
-    el.textContent = genDate
-      ? "Catalog last regenerated " + genDate + " · scraper runs weekly (Tuesday morning AEST) and opens a GitHub issue when a watched page changes."
-      : "Scraper has not run yet.";
-  });
-
-  /* ---------- Section: Study ---------- */
-  var CAT_LABEL = { "ai-masters": "AI / CS masters", "law-tech": "Law + technology", "mba": "MBA" };
-  makeSection({
-    tab: "study",
-    rows: DATA.programs,
-    defaultSort: "deadline",
-    optionLabels: { category: CAT_LABEL },
-    filterVal: function (r, key) { return r[key]; },
-    searchText: function (r) { return [r.university, r.program, r.degree, r.fit].join(" "); },
-    columns: [
-      { key: "program", sortVal: function (r) { return (r.university + r.program).toLowerCase(); } },
-      { key: "category", sortVal: function (r) { return r.category; } },
-      { key: "deadline", sortVal: sortValDeadline },
-      { key: "tuition", sortVal: function (r) { return r.tuitionSort || 0; } }
-    ],
-    rowHtml: function (r) {
-      return '<tr data-id="' + esc(r.id) + '">' +
-        '<td><div class="cell-main">' + esc(r.program) + '</div><div class="cell-sub">' + esc(r.university) + " · " + esc(r.degree) + "</div></td>" +
-        '<td><span class="badge cat">' + esc(CAT_LABEL[r.category] || r.category) + "</span></td>" +
-        '<td class="num"><div>' + esc(fmtDate(r.deadline)) + "</div><div>" + badgeHtml(r) + "</div></td>" +
-        '<td class="num">' + esc(r.tuition || "—") + "</td>" +
-        "</tr>";
-    },
-    detailTitle: function (r) { return r.program; },
-    detailSub: function (r) { return r.university + " · " + r.degree; },
-    detailPairs: function (r) {
-      return [
-        ["Category", CAT_LABEL[r.category] || r.category],
-        ["Applications open", r.opens],
-        ["Deadline", r.deadline ? fmtDate(r.deadline) : null],
-        ["Deadline notes", r.deadlineNote],
-        ["Tuition (approx.)", r.tuition],
-        ["Fit for a lawyer moving into AI", r.fit]
-      ];
-    }
-  });
-
-  /* ---------- Section: Scholarships ---------- */
-  makeSection({
-    tab: "scholarships",
-    rows: DATA.scholarships,
-    defaultSort: "deadline",
-    filterVal: function (r, key) { return r[key]; },
-    searchText: function (r) { return [r.name, r.funds, r.value, r.eligibility].join(" "); },
-    columns: [
-      { key: "name", sortVal: function (r) { return r.name.toLowerCase(); } },
-      { key: "funds", sortVal: function (r) { return (r.funds || "").toLowerCase(); } },
-      { key: "deadline", sortVal: sortValDeadline },
-      { key: "value", sortVal: function (r) { return (r.value || "").toLowerCase(); } }
-    ],
-    rowHtml: function (r) {
-      return '<tr data-id="' + esc(r.id) + '">' +
-        '<td><div class="cell-main">' + esc(r.name) + '</div><div class="cell-sub">' + esc(r.eligibility) + "</div></td>" +
-        "<td>" + esc(r.funds) + "</td>" +
-        '<td class="num"><div>' + esc(fmtDate(r.deadline)) + "</div><div>" + badgeHtml(r) + "</div></td>" +
-        "<td>" + esc(r.value) + "</td>" +
-        "</tr>";
-    },
-    detailTitle: function (r) { return r.name; },
-    detailSub: function (r) { return r.funds; },
-    detailPairs: function (r) {
-      return [
-        ["Value", r.value],
-        ["Eligibility fit", r.eligibility],
-        ["Applications open", r.opens],
-        ["Deadline", r.deadline ? fmtDate(r.deadline) : null],
-        ["Deadline notes", r.deadlineNote]
-      ];
-    }
-  });
-
-  /* ---------- Section: Startup support ---------- */
-  var REGION_LABEL = { AU: "Australia", US: "USA", World: "Rest of world" };
-  makeSection({
-    tab: "startups",
-    rows: DATA.startupSupport,
-    defaultSort: "deadline",
-    optionLabels: { region: REGION_LABEL },
-    filterVal: function (r, key) { return r[key]; },
-    searchText: function (r) { return [r.name, r.location, r.offer, r.fit].join(" "); },
-    columns: [
-      { key: "name", sortVal: function (r) { return r.name.toLowerCase(); } },
-      { key: "region", sortVal: function (r) { return r.region + (r.location || ""); } },
-      { key: "offer", sortVal: function (r) { return (r.offer || "").toLowerCase(); } },
-      { key: "deadline", sortVal: sortValDeadline }
-    ],
-    rowHtml: function (r) {
-      return '<tr data-id="' + esc(r.id) + '">' +
-        '<td><div class="cell-main">' + esc(r.name) + '</div><div class="cell-sub">' + esc(r.fit) + "</div></td>" +
-        '<td><span class="badge cat">' + esc(REGION_LABEL[r.region] || r.region) + "</span><div class=\"cell-sub\">" + esc(r.location || "") + "</div></td>" +
-        "<td>" + esc(r.offer) + '<div class="cell-sub">' + esc(r.equity || "") + "</div></td>" +
-        '<td class="num"><div>' + esc(r.deadline ? fmtDate(r.deadline) : (r.cadence || "Rolling")) + "</div><div>" + badgeHtml(r) + "</div></td>" +
-        "</tr>";
-    },
-    detailTitle: function (r) { return r.name; },
-    detailSub: function (r) { return (REGION_LABEL[r.region] || r.region) + (r.location ? " · " + r.location : ""); },
-    detailPairs: function (r) {
-      return [
-        ["Offer", r.offer],
-        ["Equity / cost", r.equity],
-        ["Application cadence", r.cadence],
-        ["Next deadline", r.deadline ? fmtDate(r.deadline) : null],
-        ["Deadline notes", r.deadlineNote],
-        ["Fit", r.fit]
-      ];
-    }
-  });
+  showTab((location.hash || "#" + TABS[0]).slice(1), false);
 })();

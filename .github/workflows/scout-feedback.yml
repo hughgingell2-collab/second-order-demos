@@ -1,0 +1,68 @@
+name: OpportunityScout feedback
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: scout-feedback
+  cancel-in-progress: false
+
+jobs:
+  record:
+    # Only react to 'scout: <action> <id>' titles from the repo owner
+    if: ${{ startsWith(github.event.issue.title, 'scout:') && github.event.issue.author_association == 'OWNER' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install PyYAML
+
+      - name: Record feedback
+        id: record
+        env:
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+        run: |
+          set +e
+          MSG=$(python scout/feedback.py "$ISSUE_TITLE" 2>&1)
+          CODE=$?
+          set -e
+          echo "msg=$MSG" >> "$GITHUB_OUTPUT"
+          echo "code=$CODE" >> "$GITHUB_OUTPUT"
+
+      - name: Regenerate dashboard data and commit
+        if: ${{ steps.record.outputs.code == '0' }}
+        run: |
+          pip install -r scout/requirements.txt
+          python scout/scraper.py --no-fetch
+          git config user.name "opportunity-scout[bot]"
+          git config user.email "actions@users.noreply.github.com"
+          git add scout/status.yaml opportunityscout/data.js
+          if ! git diff --cached --quiet; then
+            git commit -m "OpportunityScout: record feedback (${{ github.event.issue.title }})"
+            git push origin main
+          fi
+
+      - name: Reply and close issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ steps.record.outputs.code }}" = "0" ]; then
+            gh issue comment ${{ github.event.issue.number }} --repo "$GITHUB_REPOSITORY" \
+              --body "${{ steps.record.outputs.msg }} Dashboard updated."
+          else
+            gh issue comment ${{ github.event.issue.number }} --repo "$GITHUB_REPOSITORY" \
+              --body "Couldn't record that: ${{ steps.record.outputs.msg }}"
+          fi
+          gh issue close ${{ github.event.issue.number }} --repo "$GITHUB_REPOSITORY"

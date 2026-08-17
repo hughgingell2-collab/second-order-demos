@@ -2,14 +2,15 @@
 """OpportunityScout — scrapes watched opportunity pages, detects deadline changes,
 and regenerates the dashboard data file.
 
-Reads:   scout/opportunities.yaml  (curated catalog of opportunities to watch)
+Reads:   scout/opportunities.yaml  (curated catalog: categories + opportunities)
+         scout/status.yaml         (your record: applied / not-interested ids)
          scout/state.json          (previous scrape state, created on first run)
 Writes:  scout/state.json          (updated scrape state)
-         scout/report.md           (only when something changed — used to open a GitHub issue)
-         opportunityscout/data.js  (dashboard data: catalog + live scrape state)
+         scout/report.md           (only when something changed — becomes the alert issue)
+         opportunityscout/data.js  (dashboard data: catalog + status + live scrape state)
 
 Usage:   python scout/scraper.py            # scrape everything
-         python scout/scraper.py --no-fetch # regenerate data.js from catalog + existing state only
+         python scout/scraper.py --no-fetch # regenerate data.js only (no network)
 """
 
 import argparse
@@ -18,14 +19,19 @@ import json
 import re
 import sys
 import time
+import urllib.parse
 from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CATALOG_PATH = ROOT / "scout" / "opportunities.yaml"
+STATUS_PATH = ROOT / "scout" / "status.yaml"
 STATE_PATH = ROOT / "scout" / "state.json"
 REPORT_PATH = ROOT / "scout" / "report.md"
 DATA_JS_PATH = ROOT / "opportunityscout" / "data.js"
+
+REPO = "hughgingell2-collab/second-order-demos"
+DASHBOARD_URL = "https://hughgingell2-collab.github.io/second-order-demos/opportunityscout/"
 
 USER_AGENT = (
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -40,6 +46,7 @@ SIGNAL_KEYWORDS = [
     "applications are open", "applications are closed", "applications are now open",
     "now accepting", "apply now", "next cohort", "next batch", "next intake",
     "submission deadline", "nominations close", "nominations open",
+    "register", "rsvp", "tickets", "next event", "upcoming event",
 ]
 
 WINDOW = 180  # chars either side of a keyword hit to keep as "signal text"
@@ -53,23 +60,32 @@ DATE_PATTERNS = [
     re.compile(rf"\b({MONTHS})\.?\s+(\d{{1,2}})(?:st|nd|rd|th)?,?\s+(\d{{4}})\b", re.I),
     re.compile(r"\b(\d{4})-(\d{2})-(\d{2})\b"),
 ]
-MONTH_NUM = {m: i % 12 + 1 for i, m in enumerate(
+MONTH_NUM = {m: i + 1 for i, m in enumerate(
     ["january", "february", "march", "april", "may", "june", "july", "august",
-     "september", "october", "november", "december"] * 1)}
+     "september", "october", "november", "december"])}
 MONTH_NUM.update({"jan": 1, "feb": 2, "mar": 3, "apr": 4, "jun": 6, "jul": 7,
                   "aug": 8, "sep": 9, "sept": 9, "oct": 10, "nov": 11, "dec": 12})
 
 
-def load_catalog():
+def load_yaml(path, default):
     import yaml
-    with open(CATALOG_PATH, encoding="utf-8") as f:
-        return yaml.safe_load(f)
+    if not path.exists():
+        return default
+    with open(path, encoding="utf-8") as f:
+        return yaml.safe_load(f) or default
 
 
-def iter_items(catalog):
-    for section in ("programs", "scholarships", "startupSupport"):
-        for item in catalog.get(section) or []:
-            yield section, item
+def feedback_link(item_id, action):
+    """Prefilled GitHub new-issue URL used as an email 'button'."""
+    label = {"applied": "I applied to this", "hide": "Not interested / hide this"}[action]
+    title = f"scout: {action} {item_id}"
+    body = (
+        f"{label}: `{item_id}`.\n\n"
+        "Just press **Submit new issue** — the feedback bot will record it, "
+        "update the dashboard, and close this issue automatically."
+    )
+    q = urllib.parse.urlencode({"title": title, "body": body, "labels": "scout-feedback"})
+    return f"https://github.com/{REPO}/issues/new?{q}"
 
 
 def fetch_text(url):
@@ -134,10 +150,10 @@ def extract_dates(snippets):
     return sorted(found)
 
 
-def scrape(catalog, old_state, delay=1.0):
+def scrape(items, old_state, delay=1.0):
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     new_state, changes, errors = {}, [], []
-    for section, item in iter_items(catalog):
+    for item in items:
         item_id, url = item["id"], item.get("url")
         if not url or item.get("watch") is False:
             continue
@@ -152,18 +168,13 @@ def scrape(catalog, old_state, delay=1.0):
         snippets = signal_windows(text)
         dates = extract_dates(snippets)
         sig_hash = hashlib.sha256(" | ".join(snippets).encode()).hexdigest()[:16]
-        entry = {
-            "lastChecked": now,
-            "hash": sig_hash,
-            "dates": dates,
-            "error": None,
-        }
+        entry = {"lastChecked": now, "hash": sig_hash, "dates": dates, "error": None}
         prev_hash, prev_dates = prev.get("hash"), prev.get("dates") or []
         if prev_hash is not None and sig_hash != prev_hash:
             new_dates = [d for d in dates if d not in prev_dates]
             gone_dates = [d for d in prev_dates if d not in dates]
             entry["changedAt"] = now
-            changes.append((section, item, new_dates, gone_dates))
+            changes.append((item, new_dates, gone_dates))
             print(f"  CHANGE {item_id}: +{new_dates} -{gone_dates}")
         else:
             if prev.get("changedAt"):
@@ -173,56 +184,62 @@ def scrape(catalog, old_state, delay=1.0):
     return new_state, changes, errors
 
 
-def write_report(changes, errors):
+def write_report(catalog, status, changes, errors):
+    """Alert issue body. Skips not-interested items; adds feedback buttons per item."""
+    hidden = set(status.get("notInterested") or [])
+    applied = set(status.get("applied") or [])
+    changes = [c for c in changes if c[0]["id"] not in hidden]
     if not changes:
         if REPORT_PATH.exists():
             REPORT_PATH.unlink()
         return False
+    cat_labels = {c["key"]: c["label"] for c in catalog.get("categories", [])}
     lines = ["# OpportunityScout — changes detected", ""]
     lines.append(f"Scan run: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}")
     lines.append("")
-    for section, item, new_dates, gone_dates in changes:
-        name = item.get("name") or f"{item.get('university', '')} — {item.get('program', '')}".strip(" —")
-        lines.append(f"## {name}")
-        lines.append(f"- Section: {section}")
+    for item, new_dates, gone_dates in changes:
+        flag = " *(you've applied)*" if item["id"] in applied else ""
+        lines.append(f"## {item['name']}{flag}")
+        lines.append(f"- Category: {cat_labels.get(item.get('category'), item.get('category'))}")
         lines.append(f"- Page: {item['url']}")
         if new_dates:
             lines.append(f"- **New dates spotted:** {', '.join(new_dates)}")
         if gone_dates:
             lines.append(f"- Dates no longer on page: {', '.join(gone_dates)}")
         if not new_dates and not gone_dates:
-            lines.append("- Deadline-related wording on the page changed (no date change detected) — worth a look.")
+            lines.append("- Deadline/apply wording on the page changed (no date change detected) — worth a look.")
+        lines.append(f"- [✅ I applied]({feedback_link(item['id'], 'applied')}) · "
+                     f"[🚫 Not interested]({feedback_link(item['id'], 'hide')})")
         lines.append("")
     if errors:
         lines.append("## Fetch errors (page may have moved)")
         for item, err in errors:
-            name = item.get("name") or item.get("program") or item["id"]
-            lines.append(f"- {name}: `{err}` — {item['url']}")
+            lines.append(f"- {item['name']}: `{err}` — {item['url']}")
         lines.append("")
-    lines.append("_Dashboard: https://hughgingell2-collab.github.io/second-order-demos/opportunityscout/_")
+    lines.append(f"_Dashboard: {DASHBOARD_URL}_")
     REPORT_PATH.write_text("\n".join(lines), encoding="utf-8")
     return True
 
 
-def js_str(obj):
-    return json.dumps(obj, ensure_ascii=False, indent=2)
-
-
-def write_data_js(catalog, state):
-    generated = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+def write_data_js(catalog, status, state):
     payload = {
-        "generated": generated,
+        "generated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "repo": REPO,
         "profile": catalog.get("profile", {}),
-        "programs": catalog.get("programs", []),
-        "scholarships": catalog.get("scholarships", []),
-        "startupSupport": catalog.get("startupSupport", []),
+        "categories": catalog.get("categories", []),
+        "opportunities": catalog.get("opportunities", []),
+        "status": {
+            "applied": status.get("applied") or [],
+            "notInterested": status.get("notInterested") or [],
+        },
         "scrapeState": state,
     }
     DATA_JS_PATH.parent.mkdir(parents=True, exist_ok=True)
     DATA_JS_PATH.write_text(
         "// Generated by scout/scraper.py — do not edit by hand.\n"
-        "// Edit scout/opportunities.yaml and re-run the scraper instead.\n"
-        f"window.SCOUT_DATA = {js_str(payload)};\n",
+        "// Edit scout/opportunities.yaml (catalog) or scout/status.yaml (applied/hidden)\n"
+        "// and re-run the scraper instead.\n"
+        f"window.SCOUT_DATA = {json.dumps(payload, ensure_ascii=False, indent=2)};\n",
         encoding="utf-8",
     )
 
@@ -230,23 +247,26 @@ def write_data_js(catalog, state):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--no-fetch", action="store_true",
-                    help="skip scraping; regenerate data.js from catalog + existing state")
+                    help="skip scraping; regenerate data.js from catalog + existing state only")
     ap.add_argument("--delay", type=float, default=1.0, help="seconds between requests")
     args = ap.parse_args()
 
-    catalog = load_catalog()
+    catalog = load_yaml(CATALOG_PATH, {})
+    status = load_yaml(STATUS_PATH, {})
     state = json.loads(STATE_PATH.read_text()) if STATE_PATH.exists() else {}
+    items = catalog.get("opportunities", [])
 
     if args.no_fetch:
-        write_data_js(catalog, state)
+        write_data_js(catalog, status, state)
         print("data.js regenerated (no fetch).")
         return
 
-    print(f"Scanning {sum(1 for _ in iter_items(catalog))} opportunities…")
-    new_state, changes, errors = scrape(catalog, state, delay=args.delay)
+    watched = [i for i in items if i.get("url") and i.get("watch") is not False]
+    print(f"Scanning {len(watched)} of {len(items)} opportunities…")
+    new_state, changes, errors = scrape(items, state, delay=args.delay)
     STATE_PATH.write_text(json.dumps(new_state, indent=2), encoding="utf-8")
-    write_data_js(catalog, new_state)
-    had_report = write_report(changes, errors)
+    write_data_js(catalog, status, new_state)
+    had_report = write_report(catalog, status, changes, errors)
     print(f"Done. {len(changes)} change(s), {len(errors)} error(s)."
           + (" Report written." if had_report else ""))
 
